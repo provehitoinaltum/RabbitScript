@@ -1,5 +1,7 @@
+:root{
+   	counter-reset: line-num;
+}
 code.rabbit{
-	counter-reset: line-num;
 	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
 }
@@ -12,11 +14,14 @@ code.rabbit .reserved1{
 	color: #00f;
 }
 code.rabbit .operator{
-	color: #666;
+	color: #555;
 }
 code.rabbit .num{
-	color: #00c;
+	color: #01c;
+}
+code.rabbit .str{
+	color: #071;
 }
 code.rabbit .comment{
-	color: #396;
+	color: #496;
 }

@@ -1,3 +1,4 @@
+<!DOCTYPE html
 <html lang="en">
 	<head>
 		<meta charset="UTF8"/>
@@ -6,7 +7,7 @@
 	</head>
 	<body>
 		<h1>RabbitScript</h1>
-		<h2>Cheatsheets alpha version</h1>
+		<h2>Cheatsheets alpha version</h2>
 		<p>
 			This is the collection of RabbitScript cheatsheets.
 			It'll be changed as RabbitScript is being developed.
@@ -20,29 +21,34 @@
 					<td>
 						<code class="rabbit">
 							<div class="statement">
-								<span class="reserved1">var</span><!--
-							 -->&nbsp;<!--
-							 -->i1<!--
-							 -->:<!--
-							 -->&nbsp;<!--
-							 -->Int<!--
-							 -->&nbsp;<!--
-							 -->=<!--
-							 -->&nbsp;<!--
-							 --><span class="num">1</span>
-							</div>
-							<div class="statement">
-								i1<!--
-							 -->&nbsp;<!--
-							 -->=<!--
-							 -->&nbsp;<!--
-							 --><span class="num">2</span><!--
-							 -->&nbsp;&nbsp;<!--
-							 --><span class="comment">## OK</span>
+								<span class="num">1</span>
 							</div>
 						</code>
 					</td>
-					<td>variable</td>
+					<td>number (Int)</td>
+				</tr>
+				<tr>
+					<td>
+						<code class="rabbit">
+							<div class="statement">
+								<span class="num">1.5</span>
+							</div>
+						</code>
+					</td>
+					<td>number (Float)</td>
+				</tr>
+				<tr>
+					<td>
+						<code class="rabbit">
+							<div class="statement">
+								<span class="str">"s"</span>
+							</div>
+							<div class="statement">
+								<span class="str">'s'</span>
+							</div>
+						</code>
+					</td>
+					<td>string (String)</td>
 				</tr>
 				<tr>
 					<td>
@@ -66,7 +72,7 @@
 							 -->&nbsp;<!--
 							 --><span class="num">2</span><!--
 							 -->&nbsp;&nbsp;<!--
-							 --><span class="comment">## Compile Error</span>
+							 --><span class="comment">## Error</span>
 							</div>
 						</code>
 					</td>
