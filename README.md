@@ -21,7 +21,6 @@
 RabbitScript is a cute language that compiles into JavaScript.
 Its syntax is similar to both CoffeeScript and Scala.
 
+## Tutorial
 
-## What 'RabbitScript' means
-
-
+See [http://akouryy.github.io/RabbitScript/tutorial.html](Tutorial - RabbitScript).
