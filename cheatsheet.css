@@ -3,9 +3,9 @@ main>ul{
     border: 2px solid #300;
     border-radius: 0.5em;
 	list-style-type: none;
-	margin-left: 5%;
+	margin-left: 2%;
 	width: 50%;
-	padding: 0;
+	padding-left: 3em;
 }
 main>ul>li:not(:last-child){
 	border-bottom: 1px solid #999;
@@ -18,7 +18,7 @@ main>ul>li>div{
 	display: inline-block;
 	width: 25%;
 }
-code.rabbit .statement:before{
+code.rabbit .line:before{
 	position: absolute;
 	right: 95%;
 }

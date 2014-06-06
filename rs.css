@@ -5,7 +5,7 @@ code.rabbit{
 	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
 }
-code.rabbit .statement:before{
+code.rabbit .line:before{
 	color: #999;
 	counter-increment: line-num;
 	content: counter(line-num);
