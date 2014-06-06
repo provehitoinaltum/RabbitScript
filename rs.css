@@ -1,6 +1,12 @@
 code.rabbit{
+	counter-reset: line-num;
 	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
+}
+code.rabbit .statement:before{
+	color: #999;
+	counter-increment: line-num;
+	content: counter(line-num);
 }
 code.rabbit .reserved1{
 	color: #60c;
