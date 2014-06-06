@@ -1,6 +1,6 @@
 code.rabbit{
-	font-family: consolas;
-	font-size: 1.25em;
+	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
+	font-size: 1em;
 }
 code.rabbit .reserved1{
 	color: #60c;
