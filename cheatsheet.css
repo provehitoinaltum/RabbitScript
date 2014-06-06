@@ -1,7 +1,13 @@
 main>ul{
+    background-color: #ffc;
+    border: 2px solid #300;
+    border-radius: 0.5em;
 	list-style-type: none;
+	margin-left: 5%;
+	width: 50%;
+	padding: 0;
 }
-main>ul>li{
+main>ul>li:not(:last-child){
 	border-bottom: 1px solid #999;
 }
 main>ul>li>code.rabbit{
@@ -11,4 +17,8 @@ main>ul>li>code.rabbit{
 main>ul>li>div{
 	display: inline-block;
 	width: 25%;
+}
+code.rabbit .statement:before{
+	position: absolute;
+	right: 95%;
 }
