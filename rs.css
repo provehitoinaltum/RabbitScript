@@ -9,13 +9,14 @@ code.rabbit .statement:before{
 	content: counter(line-num);
 }
 code.rabbit .reserved1{
-	color: #60c;
-	font-weight: bold;
+	color: #00f;
+}
+code.rabbit .operator{
+	color: #666;
 }
 code.rabbit .num{
-	color: #006;
+	color: #00c;
 }
 code.rabbit .comment{
-	color: #390;
-	font-style: italic;
+	color: #396;
 }
