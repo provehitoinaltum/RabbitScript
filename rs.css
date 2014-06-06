@@ -27,4 +27,5 @@ code.rabbit .str{
 }
 code.rabbit .comment{
 	color: #496;
+	font-style: italic;
 }
