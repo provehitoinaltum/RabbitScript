@@ -5,6 +5,9 @@ code.rabbit{
 	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
 }
+code.rabbit .statement:not(:last-child){
+	border-bottom: 1px dotted #cc9;
+}
 code.rabbit .line:before{
 	color: #999;
 	counter-increment: line-num;
