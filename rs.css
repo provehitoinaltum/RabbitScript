@@ -1,5 +1,6 @@
 code.rabbit{
-	font-family: monospace;
+	font-family: consolas;
+	font-size: 1.25em;
 }
 code.rabbit .reserved1{
 	color: #60c;
@@ -9,6 +10,6 @@ code.rabbit .num{
 	color: #003;
 }
 code.rabbit .comment{
-	color: #6f3;
+	color: #390;
 	font-style: italic;
 }

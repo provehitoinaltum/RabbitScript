@@ -16,9 +16,82 @@
 				<tr><th>code</th><th>description</th></tr>
 			</thead>
 			<tbody>
-				<tr><td><code class="rabbit"><span class="reserved1">var</span>&nbsp;i1: Int = <span class="num">1</span><br/>i1 = <span class="num">2</span>&nbsp;&nbsp;<span class="comment">## OK</span></code></td><td>variable</td></tr>
-				<tr><td><code class="rabbit"><span class="reserved1">val</span>&nbsp;i2: Int = <span class="num">1</span><br/>i2 = <span class="num">2</span>&nbsp;&nbsp;<span class="comment">## Compile Error</span></code></td><td>constant</td></tr>
-				<tr><td><code class="rabbit"><span class="reserved1">var</span>&nbsp;i3 = <span class="num">1</span><br/>i.class&nbsp;&nbsp;<span class="comment">##&nbsp;=&nbsp;Int</span></code></td><td>type inference</td></tr>
+				<tr>
+					<td>
+						<code class="rabbit">
+							<div class="statement">
+								<span class="reserved1">var</span>
+								&nbsp;
+								i1
+								:
+								&nbsp;
+								Int
+								&nbsp;
+								=
+								&nbsp;
+								<span class="num">1</span>
+								<br/>
+								i1
+								&nbsp;
+								=
+								&nbsp;
+								<span class="num">2</span>
+								&nbsp;&nbsp;
+								<span class="comment">## OK</span>
+							</div>
+						</code>
+					</td>
+					<td>variable</td>
+				</tr>
+				<tr>
+					<td>
+						<code class="rabbit">
+							<div class="statement">
+								<span class="reserved1">val</span>
+								&nbsp;
+								i2
+								:
+								&nbsp;
+								Int
+								&nbsp;
+								=
+								&nbsp;
+								<span class="num">1</span>
+								<br/>
+								i2
+								&nbsp;
+								=
+								&nbsp;
+								<span class="num">2</span>
+								&nbsp;&nbsp;
+								<span class="comment">## Compile Error</span>
+							</div>
+						</code>
+					</td>
+					<td>constant</td>
+				</tr>
+				<tr>
+					<td>
+						<code class="rabbit">
+							<div class="statement">
+								<span class="reserved1">var</span>
+								&nbsp;
+								i3
+								&nbsp;
+								=
+								&nbsp;
+								<span class="num">1</span>
+								<br/>
+								i3
+								.
+								class
+								&nbsp;&nbsp;
+								<span class="comment">##&nbsp;=&nbsp;Int</span>
+							</div>
+						</code>
+					</td>
+					<td>type inference</td>
+				</tr>
 			</tbody>
 		</table>
 	</body>
