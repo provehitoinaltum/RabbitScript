@@ -1,3 +1,14 @@
-tbody tr{
+main>ul{
+	list-style-type: none;
+}
+main>ul>li{
 	border-bottom: 1px solid #999;
+}
+main>ul>li>code.rabbit{
+	display: inline-block;
+	width: 70%;
+}
+main>ul>li>div{
+	display: inline-block;
+	width: 30%;
 }
