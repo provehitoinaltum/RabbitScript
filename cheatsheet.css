@@ -1,0 +1,10 @@
+:root{
+   	counter-reset: line-num;
+}
+#cheetsheats{
+	border-collapse: separate;
+	border-spacing: 0 1em 0 0;
+}
+tbody tr{
+	border-bottom: 1px solid #999;
+}
