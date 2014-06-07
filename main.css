@@ -1,4 +1,5 @@
 body{
-	background-color: #fe9;
-	color: #300;
+	background-color: #fdd;
+	background-image: repeating-linear-gradient(to right, #fdd, #fdd 1%, #fee 2%, #fee 3%, #fdd 4%);
+	color: #600;
 }

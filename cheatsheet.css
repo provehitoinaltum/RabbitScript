@@ -11,14 +11,15 @@ main>ul>li:not(:last-child){
 	border-bottom: 1px solid #999;
 }
 main>ul>li>code.rabbit{
+	color: #000;
 	display: inline-block;
 	width: 70%;
+}
+main>ul>li>code.rabbit .line:before{
+	position: absolute;
+	right: 95%;
 }
 main>ul>li>div{
 	display: inline-block;
 	width: 25%;
-}
-code.rabbit .line:before{
-	position: absolute;
-	right: 95%;
 }
