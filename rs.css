@@ -30,3 +30,7 @@ code.rabbit .comment{
 	color: #496;
 	font-style: italic;
 }
+code.rabbit a[href]{
+	color: inherit !important;
+	text-decoration: underline;
+}
