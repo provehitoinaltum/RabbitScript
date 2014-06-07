@@ -674,7 +674,7 @@
 					<div>logical operators</div>
 				</li>
 			</ul>
-			<h3>simple statements</h3>
+			<h3>control statements</h3>
 			<ul>
 				<li>
 					<code class="rabbit">
@@ -695,7 +695,27 @@
 							 -->i
 							</div>
 							<div class="line">
-								<span class="comment">##&nbsp;outputs 4, returns Some(4)</span>
+								<span class="comment">##&nbsp;outputs&nbsp;4,&nbsp;returns&nbsp;Some(4)</span>
+							</div>
+						</div>
+						<div class="statement">
+							<div class="line">
+								<span class="kw">if</span><!--
+							 -->&nbsp;<!--
+							 -->i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">&gt;</span><!--
+							 -->&nbsp;<!--
+							 --><span class="num">5</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 -->log<!--
+							 -->&nbsp;<!--
+							 -->i
+							</div>
+							<div class="line">
+								<span class="comment">##&nbsp;outputs&nbsp;Nothing,&nbsp;returns&nbsp;None&nbsp;(!=&nbsp;Nothing)</span>
 							</div>
 						</div>
 						<div class="statement">
@@ -724,17 +744,79 @@
 							 -->i + 1
 							</div>
 							<div class="line">
-								<span class="comment">##&nbsp;outputs&nbsp;5,&nbsp;returns&nbsp;Some(5)</span>
+								<span class="comment">##&nbsp;outputs&nbsp;5,&nbsp;returns&nbsp;5</span>
 							</div>
 						</div>
 						<div class="statement">
 							<div class="line">
 								i<!--
-							 --><span class="op">
+							 -->&nbsp;<!--
+							 --><span class="op">=</span>
 							</div>
 							<div class="line">
 								&nbsp;&nbsp;<!--
 							 --><span class="kw">if</span><!--
+							 -->&nbsp;<!--
+							 -->i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">&gt;=</span><!--
+							 -->&nbsp;<!--
+							 --><span class="num">0</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;&nbsp;&nbsp;<!--
+							 -->i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">*</span><!--
+							 -->&nbsp;<!--
+							 -->2
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 --><span class="kw">else</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;&nbsp;&nbsp;<!--
+							 -->i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">*</span><!--
+							 -->&nbsp;<!--
+							 -->3
+							</div>
+							<div class="line">
+								<span class="comment">##&nbsp;now&nbsp;i&nbsp;is&nbsp;8</span>
+							</div>
+						</div>
+						<div class="line statement">
+							&nbsp;&nbsp;<!--
+						 -->alert<!--
+						 -->&nbsp;<!--
+						 -->i<!--
+						 -->&nbsp;<!--
+						 --><span class="kw">if</span><!--
+						 -->&nbsp;<!--
+						 -->i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">!=</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">5</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;outputs&nbsp;4,&nbsp;returns&nbsp;Some(4)</span>
+						</div>
+					</code>
+					<div>if statement</div>
+				</li>
+				<li>
+					<code class="rabbit">
+						<div class="statement">
+							<div class="line">
+								i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">=</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 --><span class="kw">unless</span><!--
 							 -->&nbsp;<!--
 							 -->i<!--
 							 -->&nbsp;<!--
@@ -759,14 +841,27 @@
 							 -->3
 							</div>
 							<div class="line">
-								<span class="comment">##&nbsp;now&nbsp;i&nbsp;is&nbsp;8</span>
+								<span class="comment">##&nbsp;now&nbsp;i&nbsp;is&nbsp;24</span>
 							</div>
 						</div>
+						<div class="line statement">
+							&nbsp;&nbsp;<!--
+						 -->alert<!--
+						 -->&nbsp;<!--
+						 -->i<!--
+						 -->&nbsp;<!--
+						 --><span class="kw">unless</span><!--
+						 -->&nbsp;<!--
+						 -->i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">==</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">24</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;outputs&nbsp;Nothing,&nbsp;returns&nbsp;None&nbsp;(!=&nbsp;Nothing)</span>
+						</div>
 					</code>
-					<div>if statement</div>
-				</li>
-				<li>
-					<div></div>
+					<div>unless statement</div>
 				</li>
 			</ul>
 		</main>
