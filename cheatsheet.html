@@ -14,7 +14,7 @@
 			RabbitScript cheatsheets
 		</p>
 		<main>
-			<h3>basic</h3>
+			<h3>simple statements</h3>
 			<ul>
 				<li>
 					<code class="rabbit">
@@ -295,7 +295,7 @@
 						 --><span class="comment">##&nbsp;=&nbsp;32</span>
 						</div>
 					</code>
-					<div>numeric operator</div>
+					<div>numeric operators</div>
 				</li>
 				<li>
 					<code class="rabbit">
@@ -450,7 +450,7 @@
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
-							<span class="reserved1">var</span><!--
+							<span class="kw">var</span><!--
 						 -->&nbsp;<!--
 						 -->i<!--
 						 -->:<!--
@@ -476,7 +476,7 @@
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
-							<span class="reserved1">val</span><!--
+							<span class="kw">val</span><!--
 						 -->&nbsp;<!--
 						 -->j<!--
 						 -->:<!--
@@ -502,7 +502,7 @@
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
-							<span class="reserved1">var</span><!--
+							<span class="kw">var</span><!--
 						 -->&nbsp;<!--
 						 -->i2<!--
 						 -->&nbsp;<!--
@@ -672,6 +672,101 @@
 						</div>
 					</code>
 					<div>logical operators</div>
+				</li>
+			</ul>
+			<h3>simple statements</h3>
+			<ul>
+				<li>
+					<code class="rabbit">
+						<div class="statement">
+							<div class="line">
+								<span class="kw">if</span><!--
+							 -->&nbsp;<!--
+							 -->i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">&lt;</span><!--
+							 -->&nbsp;<!--
+							 --><span class="num">5</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 -->alert<!--
+							 -->&nbsp;<!--
+							 -->i
+							</div>
+							<div class="line">
+								<span class="comment">##&nbsp;outputs 4, returns Some(4)</span>
+							</div>
+						</div>
+						<div class="statement">
+							<div class="line">
+								<span class="kw">if</span><!--
+							 -->&nbsp;<!--
+							 -->i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">==</span><!--
+							 -->&nbsp;<!--
+							 --><span class="num">5</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 -->alert<!--
+							 -->&nbsp;<!--
+							 -->i
+							</div>
+							<div class="line">
+								<span class="kw">else</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 -->alert<!--
+							 -->&nbsp;<!--
+							 -->i + 1
+							</div>
+							<div class="line">
+								<span class="comment">##&nbsp;outputs&nbsp;5,&nbsp;returns&nbsp;Some(5)</span>
+							</div>
+						</div>
+						<div class="statement">
+							<div class="line">
+								i<!--
+							 --><span class="op">
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 --><span class="kw">if</span><!--
+							 -->&nbsp;<!--
+							 -->i<!--
+							 -->&nbsp;<!--
+							 --><span class="op">&gt;=</span><!--
+							 -->&nbsp;<!--
+							 --><span class="num">0</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;&nbsp;&nbsp;<!--
+							 -->i<!--
+							 --><span class="op">*</span><!--
+							 -->2
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;<!--
+							 --><span class="kw">else</span>
+							</div>
+							<div class="line">
+								&nbsp;&nbsp;&nbsp;&nbsp;<!--
+							 -->i<!--
+							 --><span class="op">*</span><!--
+							 -->3
+							</div>
+							<div class="line">
+								<span class="comment">##&nbsp;now&nbsp;i&nbsp;is&nbsp;8</span>
+							</div>
+						</div>
+					</code>
+					<div>if statement</div>
+				</li>
+				<li>
+					<div></div>
 				</li>
 			</ul>
 		</main>

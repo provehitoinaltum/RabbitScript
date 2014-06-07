@@ -14,9 +14,6 @@ code.rabbit .line:before{
 	counter-increment: line-num;
 	content: counter(line-num);
 }
-code.rabbit .reserved1{
-	color: #00f;
-}
 code.rabbit .kw{
 	color: #00f;
 }
