@@ -2,6 +2,7 @@ main>ul{
 	background-color: rgba(255, 255, 225, 0.75);
 	border: 2px solid #300;
 	border-radius: 0.5em;
+	counter-reset: line-num;
 	list-style-type: none;
 	margin-left: 2%;
 	width: 50%;
