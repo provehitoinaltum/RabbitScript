@@ -152,75 +152,6 @@
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
-							<span class="reserved1">var</span><!--
-						 -->&nbsp;<!--
-						 -->i<!--
-						 -->:<!--
-						 -->&nbsp;<!--
-						 -->Int<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">1</span>
-						</div>
-						<div class="line statement">
-							i<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">2</span><!--
-						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">##&nbsp;OK</span>
-						</div>
-					</code>
-					<div>variable &amp; assignment</div>
-				</li>
-				<li>
-					<code class="rabbit">
-						<div class="line statement">
-							<span class="reserved1">val</span><!--
-						 -->&nbsp;<!--
-						 -->j<!--
-						 -->:<!--
-						 -->&nbsp;<!--
-						 -->Int<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">1</span>
-						</div>
-						<div class="line statement">
-							j<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">2</span><!--
-						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">##&nbsp;Error</span>
-						</div>
-					</code>
-					<div>constant &amp; assignment</div>
-				</li>
-				<li>
-					<code class="rabbit">
-						<div class="line statement">
-							<span class="reserved1">var</span><!--
-						 -->&nbsp;<!--
-						 -->i2<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">1</span>
-						</div>
-						<div class="line statement">
-							<span class="comment">##&nbsp;&lt;=&gt;&nbsp;var&nbsp;i2:&nbsp;Int&nbsp;=&nbsp;1</span>
-						</div>
-					</code>
-					<div>type inference</div>
-				</li>
-				<li>
-					<code class="rabbit">
-						<div class="line statement">
 							<span class="num">2</span><!--
 						 -->&nbsp;<!--
 						 --><span class="op">+</span><!--
@@ -402,30 +333,21 @@
 						 -->,<!--
 						 -->&nbsp;<!--
 						 --><span class="num">3</span><!--
-						 -->,<!--
-						 -->&nbsp;<!--
-						 --><span class="num">5</span><!--
-						 -->,<!--
-						 -->&nbsp;<!--
-						 --><span class="num">8</span><!--
 						 -->]<!--
 						 -->&nbsp;<!--
 						 --><span class="op">+</span><!--
 						 -->&nbsp;<!--
 						 -->[<!--
+						 --><span class="num">5</span><!--
+						 -->,<!--
+						 -->&nbsp;<!--
+						 --><span class="num">8</span><!--
+						 -->,<!--
+						 -->&nbsp;<!--
 						 --><span class="num">13</span><!--
-						 -->,<!--
-						 -->&nbsp;<!--
-						 --><span class="num">21</span><!--
-						 -->,<!--
-						 -->&nbsp;<!--
-						 --><span class="num">34</span><!--
-						 -->,<!--
-						 -->&nbsp;<!--
-						 --><span class="num">55</span><!--
 						 -->]<!--
 						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">##&nbsp;=&nbsp;[1,1,2,3,5,8,13,21,34,55]</span>
+						 --><span class="comment">##&nbsp;=&nbsp;[1,1,2,3,5,8,13]</span>
 						</div>
 						<div class="line statement">
 							[<!--
@@ -482,9 +404,6 @@
 						 -->,<!--
 						 -->&nbsp;<!--
 						 --><span class="num">5</span><!--
-						 -->,<!--
-						 -->&nbsp;<!--
-						 --><span class="num">8</span><!--
 						 -->]<!--
 						 -->&nbsp;<!--
 						 --><span class="op">|</span><!--
@@ -496,16 +415,13 @@
 						 --><span class="num">3</span><!--
 						 -->,<!--
 						 -->&nbsp;<!--
-						 --><span class="num">4</span><!--
-						 -->,<!--
-						 -->&nbsp;<!--
 						 --><span class="num">6</span><!--
 						 -->,<!--
 						 -->&nbsp;<!--
 						 --><span class="num">8</span><!--
 						 -->]<!--
 						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">##&nbsp;=&nbsp;[1,2,3,4,5,6,8]</span>
+						 --><span class="comment">##&nbsp;=&nbsp;[1,2,3,5,6,8]</span>
 						</div>
 						<div class="line statement">
 							[<!--
@@ -529,6 +445,75 @@
 						</div>
 					</code>
 					<div>array operator</div>
+				</li>
+				<li>
+					<code class="rabbit">
+						<div class="line statement">
+							<span class="reserved1">var</span><!--
+						 -->&nbsp;<!--
+						 -->i<!--
+						 -->:<!--
+						 -->&nbsp;<!--
+						 -->Int<!--
+						 -->&nbsp;<!--
+						 --><span class="op">=</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">1</span>
+						</div>
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">=</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">2</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;OK</span>
+						</div>
+					</code>
+					<div>variable &amp; assignment</div>
+				</li>
+				<li>
+					<code class="rabbit">
+						<div class="line statement">
+							<span class="reserved1">val</span><!--
+						 -->&nbsp;<!--
+						 -->j<!--
+						 -->:<!--
+						 -->&nbsp;<!--
+						 -->Int<!--
+						 -->&nbsp;<!--
+						 --><span class="op">=</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">1</span>
+						</div>
+						<div class="line statement">
+							j<!--
+						 -->&nbsp;<!--
+						 --><span class="op">=</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">2</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;Error</span>
+						</div>
+					</code>
+					<div>constant &amp; assignment</div>
+				</li>
+				<li>
+					<code class="rabbit">
+						<div class="line statement">
+							<span class="reserved1">var</span><!--
+						 -->&nbsp;<!--
+						 -->i2<!--
+						 -->&nbsp;<!--
+						 --><span class="op">=</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">1</span>
+						</div>
+						<div class="line statement">
+							<span class="comment">##&nbsp;&lt;=&gt;&nbsp;var&nbsp;i2:&nbsp;Int&nbsp;=&nbsp;1</span>
+						</div>
+					</code>
+					<div>type inference</div>
 				</li>
 			</ul>
 		</main>
