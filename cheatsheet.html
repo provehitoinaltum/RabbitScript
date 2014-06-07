@@ -12,7 +12,6 @@
 		<h2>Cheatsheets alpha version</h2>
 		<p>
 			This is the collection of RabbitScript cheatsheets.
-			It'll be changed as RabbitScript is being developed.
 		</p>
 		<main>
 			<ul>
@@ -22,7 +21,7 @@
 							<span class="num">1</span>
 						</div>
 						<div class="line statement">
-							<span class="num">1.5</span>
+							<span class="num">2.5</span>
 						</div>
 					</code>
 					<div>number</div>
@@ -145,7 +144,7 @@
 						<div class="line statement">
 							<span class="reserved1">var</span><!--
 						 -->&nbsp;<!--
-						 -->i1<!--
+						 -->i<!--
 						 -->:<!--
 						 -->&nbsp;<!--
 						 -->Int<!--
@@ -155,23 +154,23 @@
 						 --><span class="num">1</span>
 						</div>
 						<div class="line statement">
-							i1<!--
+							i<!--
 						 -->&nbsp;<!--
 						 --><span class="op">=</span><!--
 						 -->&nbsp;<!--
 						 --><span class="num">2</span><!--
 						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">## OK</span>
+						 --><span class="comment">##&nbsp;OK</span>
 						</div>
 					</code>
-					<div>variable</div>
+					<div>variable &amp; assignment</div>
 				</li>
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
 							<span class="reserved1">val</span><!--
 						 -->&nbsp;<!--
-						 -->i2<!--
+						 -->j<!--
 						 -->:<!--
 						 -->&nbsp;<!--
 						 -->Int<!--
@@ -181,33 +180,101 @@
 						 --><span class="num">1</span>
 						</div>
 						<div class="line statement">
-							i2<!--
+							j<!--
 						 -->&nbsp;<!--
 						 --><span class="op">=</span><!--
 						 -->&nbsp;<!--
 						 --><span class="num">2</span><!--
 						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">## Error</span>
+						 --><span class="comment">##&nbsp;Error</span>
 						</div>
 					</code>
-					<div>constant</div>
+					<div>constant &amp; assignment</div>
 				</li>
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
 							<span class="reserved1">var</span><!--
 						 -->&nbsp;<!--
-						 -->i3<!--
+						 -->i2<!--
 						 -->&nbsp;<!--
 						 --><span class="op">=</span><!--
 						 -->&nbsp;<!--
 						 --><span class="num">1</span>
 						</div>
 						<div class="line statement">
-							<span class="comment">## &lt;=&gt; var&nbsp;i3:&nbsp;Int&nbsp;=&nbsp;1</span>
+							<span class="comment">##&nbsp;&lt;=&gt;&nbsp;var&nbsp;i2:&nbsp;Int&nbsp;=&nbsp;1</span>
 						</div>
 					</code>
 					<div>type inference</div>
+				</li>
+				<li>
+					<code class="rabbit">
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">+</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">3</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;5</span>
+						</div>
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">-</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">10</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;-8</span>
+						</div>
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">*</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">6</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;8</span>
+						</div>
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">/</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">5</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;0.4</span>
+						</div>
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">//</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">5</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;0</span>
+						</div>
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">%</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">5</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;2</span>
+						</div>
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">**</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">5</span><!--
+						 -->&nbsp;&nbsp;<!--
+						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;32</span>
+						</div>
+					</code>
+					<div>operator</div>
 				</li>
 			</ul>
 		</main>
