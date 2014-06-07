@@ -1,7 +1,5 @@
-:root{
-   	counter-reset: line-num;
-}
 code.rabbit{
+   	counter-reset: line-num;
 	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
 	word-break: break-all;
