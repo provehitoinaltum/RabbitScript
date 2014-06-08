@@ -6,7 +6,13 @@ body{
 	margin: 0;
 	padding: 0;
 }
+header{
+	background-color: #300;
+	margin: 0;
+	padding: 0;
+}
 h1{
+	display: inline-block;
 	margin: 0;
 	padding: 0;
 }
