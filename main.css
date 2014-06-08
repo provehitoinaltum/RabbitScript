@@ -1,7 +1,16 @@
 body{
 	background-color: #fdd;
 	background-image: url('back.png');
-/*	background-image: repeating-linear-gradient(to right, #fdd, #fdd 0.5%, #fee 1%, #fee 1.5%, #fdd 2%);*/
+	/*background-image: repeating-linear-gradient(to right, #fdd, #fdd 0.5%, #fee 1%, #fee 1.5%, #fdd 2%);*/
 	color: #600;
+	margin: 0;
+	padding: 0;
 }
-
+h1{
+	margin: 0;
+	padding: 0;
+}
+h1 img{
+	margin: 0;
+	width: 25%;
+}
