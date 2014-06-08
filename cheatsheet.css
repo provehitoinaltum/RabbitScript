@@ -1,3 +1,6 @@
+main{
+	margin-left: 1%;
+}
 main>ul{
 	background-color: rgba(255, 255, 225, 0.75);
 	border: 2px solid #300;
@@ -18,7 +21,7 @@ main>ul>li>code.rabbit{
 }
 main>ul>li>code.rabbit .line:before{
 	position: absolute;
-	right: 95%;
+	right: calc(97% - 2.5em);
 }
 main>ul>li>div{
 	display: inline-block;
