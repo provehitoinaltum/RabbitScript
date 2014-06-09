@@ -1,10 +1,14 @@
 package org.rabbitscript
+import net.akouryy.common.Lib
 
 object RabbitScript {
   def main(args: Array[String]) {
-    RabbitParser parse args(0) match {
-      case RabbitParser.Success(tree, _) => println(tree.toJavaScript)
-      case RabbitParser.NoSuccess(err, _) => println(err)
+    import Lib._
+    using(io.Source.fromFile(args(0))) {
+      RabbitParser parse _.getLines.mkString("\n") match {
+        case RabbitParser.Success(tree, _) => println(tree.toJavaScript)
+        case x => println(x)
+      }
     }
   }
 }
