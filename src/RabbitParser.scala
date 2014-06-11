@@ -16,14 +16,15 @@ object RabbitParser extends RegexParsers {
     case intPart ~ Some(decPart) => FloatTree((intPart + decPart).toDouble)
     case intPart ~ None => IntTree(intPart.toInt)
   }
-  def string: Parser[StringTree] = (
-    "\"" ~>
+  def oneQuoteString(quote: String): Parser[StringTree] = (
+    quote ~>
       rep(
           "\\" ~! (
-              """[0btnvfr"\\\n]""".r ^^ {
+              """[0btnvfr"'\\\n]""".r ^^ {
                   case "\n" => ""
                   case "\\" => "\\"
                   case "\"" => "\""
+                  case "'"  => "'"
                   case "t"  => "\t"
                   case "n"  => "\n"
                   case "r"  => "\r"
@@ -35,11 +36,25 @@ object RabbitParser extends RegexParsers {
               }
             | failure("illegal escape sequence")
           ) ^^ { case _ ~ v => v }
-        | """[^"\\]+""".r
+        | s"[^$quote\\\\]+".r
       )
-    <~ ("\"" | failure("illegal end of string"))
-    ^^ (_.mkString) ^^ StringTree
+    <~ (quote | failure("illegal end of string"))
+    ^^ (_.mkString) ^^ StringTree(quote)
   )
+  def threeQuoteString(quote: String): Parser[StringTree] = (
+    repN(3, quote) ~>
+      rep(s"$quote{0,2}".r ~ (
+            s"[^$quote#]+".r
+/*
+          | "#{" ~> opt(expr) <~ "}" ^^ {
+              case Some(expr)
+            }
+*/
+        ) ^^ { case q ~ s => q + s }
+      )
+    <~ (repN(3, quote) | failure("illegal end of string"))
+    ^^ (_.mkString) ^^ StringTree(quote)
+  )
+  def string: Parser[StringTree] = threeQuoteString("\"") | threeQuoteString("'") | oneQuoteString("\"") | oneQuoteString("'")
   def parse(s: String) = parseAll(expr, s)
 }
-
