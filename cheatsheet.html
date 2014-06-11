@@ -463,36 +463,8 @@
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
-							<span class="kw">var</span><!--
-						 -->&nbsp;<!--
-						 -->i<!--
-						 -->:<!--
-						 -->&nbsp;<!--
-						 -->Int<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">1</span>
-						</div>
-						<div class="line statement">
 							i<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">2</span><!--
-						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">##&nbsp;OK</span>
-						</div>
-					</code>
-					<div>variable &amp; assignment</div>
-				</li>
-				<li>
-					<code class="rabbit">
-						<div class="line statement">
-							<span class="kw">val</span><!--
-						 -->&nbsp;<!--
-						 -->j<!--
-						 -->:<!--
+						 --><span class="op">:</span><!--
 						 -->&nbsp;<!--
 						 -->Int<!--
 						 -->&nbsp;<!--
@@ -500,36 +472,32 @@
 						 -->&nbsp;<!--
 						 --><span class="num">1</span>
 						</div>
-						<div class="line statement">
-							j<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
-						 -->&nbsp;<!--
-						 --><span class="num">2</span><!--
-						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">##&nbsp;Error</span>
-						</div>
 					</code>
-					<div>constant &amp; assignment</div>
+					<div>variable definition</div>
 				</li>
 				<li>
 					<code class="rabbit">
 						<div class="line statement">
-							<span class="kw">var</span><!--
+							i2<!--
 						 -->&nbsp;<!--
-						 -->i2<!--
-						 -->&nbsp;<!--
-						 --><span class="op">=</span><!--
+						 --><span class="op">:=</span><!--
 						 -->&nbsp;<!--
 						 --><span class="num">1</span><!--
 						 -->&nbsp;&nbsp;<!--
-						 --><span class="comment">##&nbsp;&lt;=&gt;&nbsp;var&nbsp;i2:&nbsp;Int&nbsp;=&nbsp;1</span>
+						 --><span class="comment">##same&nbsp;as&nbsp;i2:&nbsp;Int&nbsp;=&nbsp;1</span>
 						</div>
 					</code>
 					<div>type inference</div>
 				</li>
 				<li>
 					<code class="rabbit">
+						<div class="line statement">
+							i<!--
+						 -->&nbsp;<!--
+						 --><span class="op">=</span><!--
+						 -->&nbsp;<!--
+						 --><span class="num">2</span>
+						</div>
 						<div class="line statement">
 							i<!--
 						 -->&nbsp;<!--
@@ -553,7 +521,7 @@
 						 --><span class="comment">##&nbsp;now&nbsp;i&nbsp;is&nbsp;4,&nbsp;i2&nbsp;is&nbsp;0.25</span>
 						</div>
 					</code>
-					<div>self assignment operators</div>
+					<div>assignment operators</div>
 				</li>
 				<li>
 					<code class="rabbit">
