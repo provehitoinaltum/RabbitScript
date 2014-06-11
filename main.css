@@ -8,6 +8,8 @@ body{
 }
 header{
 	background-color: #300;
+	box-shadow: 0 3px 3px rgba(0, 0, 0, 0.5);
+	color: #ec7;
 	margin: 0;
 	padding: 0;
 }
@@ -20,4 +22,39 @@ h1{
 h1 img{
 	margin: 0;
 	width: 100%;
+}
+#menu{
+	display: inline-block;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	width: 70%;
+}
+#menu>li{
+	display: inline-block;
+	font-size: 1.5em;
+	padding: 0 2em;
+}
+#menu>li>span{
+	cursor: pointer;
+}
+#menu>li>ul{
+	background-color: #300;
+	border: 1px solid #633;
+	border-top: none;
+	border-radius: 0 0 5px 5px;
+	box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.5);
+	display: none;
+	font-size: 0.75em;
+	list-style-type: none;
+	margin: 1px -0.5em 0;
+	padding: 0.5em;
+	position: absolute;
+}
+#menu>li>ul>li>a{
+	color: #0ff !important;
+}
+#menu>li>a{
+	color: inherit !important;
+	text-decoration: none;
 }

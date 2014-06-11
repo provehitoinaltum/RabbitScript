@@ -5,15 +5,35 @@
 		<link href="main.css" rel="stylesheet"/>
 		<link href="cheatsheet.css" rel="stylesheet"/>
 		<link href="rs.css" rel="stylesheet"/>
-		<title>Cheatsheets - RabbitScript</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+		<script>
+			$(function(){
+				$('#member span').click(function(){
+					$(this).parent().children('ul').toggle();
+				});
+			})
+		</script>
+		<title>Cheat sheets - RabbitScript</title>
 	</head>
 	<body>
 		<header>
 			<h1><img src="title.png" alt="RabbitScript" title="RabbitScript"/></h1>
+			<ul id="menu">
+				<li id="member">
+					<span>members</span>
+					<ul>
+						<li><a href="http://akouryy.net/" target="_blank">akouryy</a> (author)</li>
+						<li><a href="http://hakatashi.com/" target="_blank">hakatashi</a> (logo design)</li>
+					</ul>
+				</li>
+				<li id="github">
+					<a href="https://github.com/akouryy/RabbitScript" target="_blank">github</a>
+				</li>
+			</ul>
 		</header>
-		<h2>Cheatsheets alpha version</h2>
+		<h2>Cheat sheets alpha version</h2>
 		<p>
-			RabbitScript cheatsheets
+			RabbitScript cheat sheets
 		</p>
 		<main>
 			<h3>simple statements</h3>
