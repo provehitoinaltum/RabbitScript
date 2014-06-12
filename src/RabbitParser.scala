@@ -1,25 +1,45 @@
 package org.rabbitscript
 import util.parsing.combinator._
 
-object RabbitParser extends RegexParsers {
+trait RabbitTypeParser {
+  self: RabbitParser =>
+  import trees._
+  def tterm: Parser[RabbitTree] = identifier ^^ StringTree("#")
+}
+
+class RabbitParser extends RegexParsers with RabbitTypeParser{
   import trees._
   override val skipWhitespace = false
-  def expr: Parser[RabbitTree] = expr1
-  def expr1: Parser[RabbitTree] = expr2
-  def expr2: Parser[RabbitTree] = expr3
-  def expr3: Parser[RabbitTree] = expr4
-  def expr4: Parser[RabbitTree] = expr5
-  def expr5: Parser[RabbitTree] = expr6
-  def expr6: Parser[RabbitTree] = term
-  def term: Parser[RabbitTree] = num | string
-  def num: Parser[ValueTree] = """-?+[1-9][0-9]*+|0""".r ~ """\.[0-9]++""".r.? ^^ {
-    case intPart ~ Some(decPart) => FloatTree((intPart + decPart).toDouble)
-    case intPart ~ None => IntTree(intPart.toInt)
-  }
+  val reserved = List("var", "function")
+
+  def identifier: Parser[String] =
+    """[a-z][a-zA-Z0-9_]*""".r ^? ({
+      case id if !(reserved contains id) => id
+    }, id => s"""reserved word "$id" can't be used as identifier""")
+
+  def num: Parser[ValueTree] = (
+      ("+" | "-").? ~ (
+          "[1-9][0-9]*+".r ^^ (_.toInt)
+        | "0" ^^ Function.const(0)
+        | guard("""\.[0-9]""".r) ~> err("number literal must have integer part(not only decimal point)")
+      ) ~ (
+        "." ~> (
+            "[0-9]++".r
+          | err("decimal number literal must have decimal part (not only decimal point)")
+        )
+      ).? ^^ {
+        case Some("-") ~ intPart ~ Some(decPart) => FloatTree(-(intPart + "." + decPart).toDouble)
+        case _         ~ intPart ~ Some(decPart) => FloatTree((intPart + "." + decPart).toDouble)
+        case Some("-") ~ intPart ~ None => IntTree(-intPart)
+        case _         ~ intPart ~ None => IntTree(intPart)
+      }
+    | ("+" | "-") ~> failure("number literal expected but not found")
+  )
+
   def oneQuoteString(quote: String): Parser[StringTree] = (
     quote ~>
       rep(
-          "\\" ~! (
+          "\\" ~> (
               """[0btnvfr"'\\\n]""".r ^^ {
                   case "\n" => ""
                   case "\\" => "\\"
@@ -35,26 +55,49 @@ object RabbitParser extends RegexParsers {
                   Integer.parseInt(s.slice(1, 5), 16).toChar.toString
               }
             | failure("illegal escape sequence")
-          ) ^^ { case _ ~ v => v }
+          )
         | s"[^$quote\\\\]+".r
       )
     <~ (quote | failure("illegal end of string"))
     ^^ (_.mkString) ^^ StringTree(quote)
   )
+
   def threeQuoteString(quote: String): Parser[StringTree] = (
     repN(3, quote) ~>
       rep(s"$quote{0,2}".r ~ (
-            s"[^$quote#]+".r
-/*
-          | "#{" ~> opt(expr) <~ "}" ^^ {
-              case Some(expr)
-            }
-*/
+            s"[^$quote]+".r
+//        | ...
         ) ^^ { case q ~ s => q + s }
       )
     <~ (repN(3, quote) | failure("illegal end of string"))
     ^^ (_.mkString) ^^ StringTree(quote)
   )
-  def string: Parser[StringTree] = threeQuoteString("\"") | threeQuoteString("'") | oneQuoteString("\"") | oneQuoteString("'")
+
+  def string: Parser[StringTree] = (
+    threeQuoteString("\"") | threeQuoteString("'")
+    | oneQuoteString("\"") | oneQuoteString("'")
+  )
+
+  def expr: Parser[RabbitTree] = (
+      identifier ~ (rep(" ") ~ ":" ~ rep(" ") ~ "=" ~ rep(" ")) ~ expr1 ^^ {
+        case n ~ _ ~ v => AssignTree(n, v)
+      }
+    | expr1
+  )
+
+  def expr1: Parser[RabbitTree] = expr2
+
+  def expr2: Parser[RabbitTree] = expr3
+
+  def expr3: Parser[RabbitTree] = expr4
+
+  def expr4: Parser[RabbitTree] = expr5
+
+  def expr5: Parser[RabbitTree] = expr6
+
+  def expr6: Parser[RabbitTree] = term
+
+  def term: Parser[RabbitTree] = num | string | failure("no term found")
+
   def parse(s: String) = parseAll(expr, s)
 }
