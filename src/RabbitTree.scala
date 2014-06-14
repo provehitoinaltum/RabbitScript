@@ -24,6 +24,9 @@ case class StringTree(quote: String)(value: String) extends ValueTree {
     ) + quote
   }
 }
-case class AssignTree(name: String, value: RabbitTree) extends RabbitTree {
-  override def toJavaScript = s"var $name = ${value.toJavaScript}"
+case class VarDefTree(name: String, value: RabbitTree) extends RabbitTree {
+  override def toJavaScript = s"var $name;\n$name = ${value.toJavaScript}"
+}
+case class TwoOpTree(op: String, l: RabbitTree, r: RabbitTree) extends RabbitTree {
+  override def toJavaScript = s"(${l.toJavaScript}) $op (${r.toJavaScript})"
 }

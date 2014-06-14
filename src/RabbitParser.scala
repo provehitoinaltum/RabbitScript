@@ -80,24 +80,39 @@ class RabbitParser extends RegexParsers with RabbitTypeParser{
 
   def expr: Parser[RabbitTree] = (
       identifier ~ (rep(" ") ~ ":" ~ rep(" ") ~ "=" ~ rep(" ")) ~ expr1 ^^ {
-        case n ~ _ ~ v => AssignTree(n, v)
+        case n ~ _ ~ v => VarDefTree(n, v)
       }
     | expr1
   )
 
-  def expr1: Parser[RabbitTree] = expr2
+  def expr1: Parser[RabbitTree] = (
+    expr2 ~ (rep(" ") ~ ("+" | "-") ~ rep1(" ") ~ expr2).* ^^ {
+      case x ~ list => (x /: list) {(l, y) =>
+        y match {
+          case _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
+        }
+      }
+    }
+  )
 
-  def expr2: Parser[RabbitTree] = expr3
+  def expr2: Parser[RabbitTree] = (
+    expr3 ~ (rep(" ") ~ ("*" | "//" | "/" | "%%" | "%") ~ rep1(" ") ~ expr3).* ^^ {
+      case x ~ list => (x /: list) {(l, y) =>
+        y match {
+          case _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
+        }
+      }
+    }
+  )
 
-  def expr3: Parser[RabbitTree] = expr4
+  def expr3: Parser[RabbitTree] = (
+      term ~ rep(" ") ~ "**" ~ rep1(" ") ~ expr3 ^^ {
+        case l ~ _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
+      }
+    | term
+  )
 
-  def expr4: Parser[RabbitTree] = expr5
-
-  def expr5: Parser[RabbitTree] = expr6
-
-  def expr6: Parser[RabbitTree] = term
-
-  def term: Parser[RabbitTree] = num | string | failure("no term found")
+  def term: Parser[RabbitTree] = num | string | ("(" ~> rep(" ") ~> expr <~ rep(" ") <~ ")") | failure("no term found")
 
   def parse(s: String) = parseAll(expr, s)
 }
