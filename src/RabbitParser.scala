@@ -1,16 +1,21 @@
 package org.rabbitscript
 import util.parsing.combinator._
+import trees._
+import Function.const
 
-trait RabbitTypeParser {
+trait RabbitIndentParser {
   self: RabbitParser =>
-  import trees._
-  def tterm: Parser[RabbitTree] = identifier ^^ StringTree("#")
+
+  type PA = Parser[Any]
+  def indent(i: Int): Parser[Unit] = rep(" ") ~ "\n" ~ (" " * i) ^^ const()
+  def indent3(beforeIndent: => PA = "")(i: Int)(afterIndent: => PA = ""): Parser[Unit] =
+    indent4(beforeIndent)(i)(afterIndent)(afterIndent)
+  def indent4(beforeIndent: => PA = "")(i: Int)(whenIndent: => PA = "")(whenNoIndent: => PA = ""): Parser[Unit] =
+    (beforeIndent ~> indent(i) ~> whenIndent | whenNoIndent) ^^ const()
 }
 
-class RabbitParser extends RegexParsers with RabbitTypeParser{
-  import trees._
-  override val skipWhitespace = false
-  val reserved = List("var", "function")
+trait RabbitTokenParser {
+  self: RabbitParser =>
 
   def identifier: Parser[String] =
     """[a-z][a-zA-Z0-9_]*""".r ^? ({
@@ -20,7 +25,7 @@ class RabbitParser extends RegexParsers with RabbitTypeParser{
   def num: Parser[ValueTree] = (
       ("+" | "-").? ~ (
           "[1-9][0-9]*+".r ^^ (_.toInt)
-        | "0" ^^ Function.const(0)
+        | "0" ^^ const(0)
         | guard("""\.[0-9]""".r) ~> err("number literal must have integer part(not only decimal point)")
       ) ~ (
         "." ~> (
@@ -77,16 +82,27 @@ class RabbitParser extends RegexParsers with RabbitTypeParser{
     threeQuoteString("\"") | threeQuoteString("'")
     | oneQuoteString("\"") | oneQuoteString("'")
   )
+}
 
-  def expr: Parser[RabbitTree] = (
-      identifier ~ (rep(" ") ~ ":" ~ rep(" ") ~ "=" ~ rep(" ")) ~ expr1 ^^ {
+trait RabbitTypeParser {
+  self: RabbitParser =>
+
+  def tterm: Parser[RabbitTree] = identifier ^^ StringTree("#")
+}
+
+class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitTypeParser{
+  override val skipWhitespace = false
+  val reserved = List("var", "function")
+
+  def expr(i: Int): Parser[RabbitTree] = (
+      identifier ~ (rep(" ") ~ ":" ~ rep(" ") ~ "=" ~ indent4(rep(" "))(i + 2)()(rep(" "))) ~ expr1(i) ^^ {
         case n ~ _ ~ v => VarDefTree(n, v)
       }
-    | expr1
+    | expr1(i)
   )
 
-  def expr1: Parser[RabbitTree] = (
-    expr2 ~ (rep(" ") ~ ("+" | "-") ~ rep1(" ") ~ expr2).* ^^ {
+  def expr1(i: Int): Parser[RabbitTree] = (
+    expr2(i) ~ (indent4(rep(" "))(i + 2)()(rep(" ")) ~ ("+" | "-") ~ indent4(rep(" "))(i + 2)()(rep1(" ")) ~ expr2(i)).* ^^ {
       case x ~ list => (x /: list) {(l, y) =>
         y match {
           case _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
@@ -95,8 +111,10 @@ class RabbitParser extends RegexParsers with RabbitTypeParser{
     }
   )
 
-  def expr2: Parser[RabbitTree] = (
-    expr3 ~ (rep(" ") ~ ("*" | "//" | "/" | "%%" | "%") ~ rep1(" ") ~ expr3).* ^^ {
+  def expr2(i: Int): Parser[RabbitTree] = (
+    expr3(i) ~ (
+      indent4(rep(" "))(i + 2)()(rep(" ")) ~ ("*" | "//" | "/" | "%%" | "%") ~ indent4(rep(" "))(i + 2)()(rep1(" ")) ~ expr3(i)
+    ).* ^^ {
       case x ~ list => (x /: list) {(l, y) =>
         y match {
           case _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
@@ -105,14 +123,17 @@ class RabbitParser extends RegexParsers with RabbitTypeParser{
     }
   )
 
-  def expr3: Parser[RabbitTree] = (
-      term ~ rep(" ") ~ "**" ~ rep1(" ") ~ expr3 ^^ {
+  def expr3(i: Int): Parser[RabbitTree] = (
+      term(i) ~ indent4(rep(" "))(i + 2)()(rep(" ")) ~ "**" ~ indent4(rep(" "))(i + 2)()(rep1(" ")) ~ expr3(i) ^^ {
         case l ~ _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
       }
-    | term
+    | term(i)
   )
 
-  def term: Parser[RabbitTree] = num | string | ("(" ~> rep(" ") ~> expr <~ rep(" ") <~ ")") | failure("no term found")
+  def term(i: Int): Parser[RabbitTree] =
+    num | string | (
+      "(" ~> indent4(rep(" "))(0)(rep(" "))(rep(" ")) ~> expr(0) <~ indent4(rep(" "))(i)(rep(" "))(rep(" ")) <~ ")"
+    ) | failure("no term found")
 
-  def parse(s: String) = parseAll(expr, s)
+  def parse(s: String) = parseAll(expr(0), s)
 }

@@ -28,5 +28,15 @@ case class VarDefTree(name: String, value: RabbitTree) extends RabbitTree {
   override def toJavaScript = s"var $name;\n$name = ${value.toJavaScript}"
 }
 case class TwoOpTree(op: String, l: RabbitTree, r: RabbitTree) extends RabbitTree {
-  override def toJavaScript = s"(${l.toJavaScript}) $op (${r.toJavaScript})"
+  override def toJavaScript = {
+    val ls = l match {
+      case _: ValueTree => l.toJavaScript
+      case _ => "(" + l.toJavaScript + ")"
+    }
+    val rs = r match {
+      case _: ValueTree => r.toJavaScript
+      case _ => "(" + r.toJavaScript + ")"
+    }
+    ls + " " + op + " " + rs
+  }
 }
