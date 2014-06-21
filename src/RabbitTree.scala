@@ -42,10 +42,12 @@ case class BinaryOpTree(op: String, l: RabbitTree, r: RabbitTree) extends Rabbit
   def debugJavaScript = {
     val ls = l match {
       case _: ValueTree => l.debugJavaScript
+      case _: VarRefTree => l.debugJavaScript
       case _ => "(" + l.debugJavaScript + ")"
     }
     val rs = r match {
       case _: ValueTree => r.debugJavaScript
+      case _: VarRefTree => r.debugJavaScript
       case _ => "(" + r.debugJavaScript + ")"
     }
     ls + " " + op + " " + rs

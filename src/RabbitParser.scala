@@ -109,7 +109,7 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
 
   def expr1(i: Int): Parser[RabbitTree] = (
     expr2(i) ~ rep(
-      (indent.**|*(0) ~> ("+" | "-") <~ indent.**|+(0)) ~ expr2(i)
+      (indent.**|*(0) ~> ("==" | "!=" | "<" | "<=" | ">" | ">=") <~ indent.**|+(0)) ~ expr2(i)
     ) ^^ {
       case x ~ list => (x /: list) {(l, y) =>
         y match {
@@ -120,9 +120,9 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
   )
 
   def expr2(i: Int): Parser[RabbitTree] = (
-    expr3(i) ~ (
-      (indent.**|*(0) ~> ("*" | "//" | "/" | "%%" | "%") <~ indent.**|+(0)) ~ expr3(i)
-    ).* ^^ {
+    expr3(i) ~ rep(
+      (indent.**|*(0) ~> ("+" | "-") <~ indent.**|+(0)) ~ expr3(i)
+    ) ^^ {
       case x ~ list => (x /: list) {(l, y) =>
         y match {
           case op ~ r => BinaryOpTree(op, l, r)
@@ -132,7 +132,19 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
   )
 
   def expr3(i: Int): Parser[RabbitTree] = (
-      term(i) ~ (indent.**|*(0) ~> "**" <~ indent.**|+(0)) ~ expr3(i) ^^ {
+    expr4(i) ~ rep(
+      (indent.**|*(0) ~> ("*" | "//" | "/" | "%%" | "%") <~ indent.**|+(0)) ~ expr4(i)
+    ) ^^ {
+      case x ~ list => (x /: list) {(l, y) =>
+        y match {
+          case op ~ r => BinaryOpTree(op, l, r)
+        }
+      }
+    }
+  )
+
+  def expr4(i: Int): Parser[RabbitTree] = (
+      term(i) ~ (indent.**|*(0) ~> "**" <~ indent.**|+(0)) ~ expr4(i) ^^ {
         case l ~ op ~ r => BinaryOpTree(op, l, r)
       }
     | term(i)
