@@ -26,6 +26,9 @@ case class StringTree(quote: String)(value: String) extends ValueTree {
 case class VarDefTree(name: String, value: RabbitTree) extends RabbitTree {
   def debugJavaScript = s"var $name;\n$name = ${value.debugJavaScript}"
 }
+case class VarRefTree(name: String) extends RabbitTree {
+  def debugJavaScript = name
+}
 case class UnaryOpTree(op: String, v: RabbitTree) extends RabbitTree {
   def debugJavaScript = {
     val vs = v match {

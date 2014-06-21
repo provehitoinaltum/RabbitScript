@@ -145,6 +145,7 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
       }
     | string
     | "(" ~> indent.**|*(0) ~> expr(0) <~ indent.**|*(0) <~ ")"
+    | identifier ^^ VarRefTree
     | failure("no term found")
   )
 
