@@ -1,18 +1,17 @@
 package org.rabbitscript.trees
 
 sealed trait RabbitTree {
-  def toJavaScript: String
+  def debugJavaScript: String
 }
 abstract class ValueTree extends RabbitTree
 case class IntTree(value: Int) extends ValueTree {
-  override def toJavaScript = value.toString()
+  def debugJavaScript = value.toString()
 }
 case class FloatTree(value: Double) extends ValueTree {
-  override def toJavaScript = value.toString()
+  def debugJavaScript = value.toString()
 }
 case class StringTree(quote: String)(value: String) extends ValueTree {
-  override def toJavaScript = js
-  lazy val js = {
+  lazy val debugJavaScript = {
     val s = value.replace("\\", "\\\\")
                  .replace("\t", "\\t")
                  .replace("\n", "\\n")
@@ -25,18 +24,31 @@ case class StringTree(quote: String)(value: String) extends ValueTree {
   }
 }
 case class VarDefTree(name: String, value: RabbitTree) extends RabbitTree {
-  override def toJavaScript = s"var $name;\n$name = ${value.toJavaScript}"
+  def debugJavaScript = s"var $name;\n$name = ${value.debugJavaScript}"
 }
-case class TwoOpTree(op: String, l: RabbitTree, r: RabbitTree) extends RabbitTree {
-  override def toJavaScript = {
+case class UnaryOpTree(op: String, v: RabbitTree) extends RabbitTree {
+  def debugJavaScript = {
+    val vs = v match {
+      case _: ValueTree => v.debugJavaScript
+      case _ => "(" + v.debugJavaScript + ")"
+    }
+    op + vs
+  }
+}
+case class BinaryOpTree(op: String, l: RabbitTree, r: RabbitTree) extends RabbitTree {
+  def debugJavaScript = {
     val ls = l match {
-      case _: ValueTree => l.toJavaScript
-      case _ => "(" + l.toJavaScript + ")"
+      case _: ValueTree => l.debugJavaScript
+      case _ => "(" + l.debugJavaScript + ")"
     }
     val rs = r match {
-      case _: ValueTree => r.toJavaScript
-      case _ => "(" + r.toJavaScript + ")"
+      case _: ValueTree => r.debugJavaScript
+      case _ => "(" + r.debugJavaScript + ")"
     }
     ls + " " + op + " " + rs
   }
+}
+case class BlockTree(stmts: List[RabbitTree]) extends RabbitTree {
+  def debugJavaScript = 
+    (stmts map (_.debugJavaScript) mkString ";\n") + ";"
 }

@@ -6,12 +6,15 @@ import Function.const
 trait RabbitIndentParser {
   self: RabbitParser =>
 
-  type PA = Parser[Any]
-  def indent(i: Int): Parser[Unit] = rep(" ") ~ "\n" ~ (" " * i) ^^ const()
-  def indent3(beforeIndent: => PA = "")(i: Int)(afterIndent: => PA = ""): Parser[Unit] =
-    indent4(beforeIndent)(i)(afterIndent)(afterIndent)
-  def indent4(beforeIndent: => PA = "")(i: Int)(whenIndent: => PA = "")(whenNoIndent: => PA = ""): Parser[Unit] =
-    (beforeIndent ~> indent(i) ~> whenIndent | whenNoIndent) ^^ const()
+  object indent extends (Int => Parser[Unit]) {
+    def apply(i: Int): Parser[Unit] = "\n" ~ (" " * i) ^^ const()
+    def *(i: Int): Parser[Unit] = rep(" ") ~> this(i)
+    def *|*(i: Int): Parser[Unit] = rep(" ") ~ this(i).? ^^ const()
+    def *|+(i: Int): Parser[Unit] = rep(" ") ~> this(i) | rep1(" ") ^^ const()
+    def **(i: Int): Parser[Unit] = rep(" ") ~> this(i) <~ rep(" ")
+    def **|*(i: Int): Parser[Unit] = rep(" ") ~ (this(i) ~ rep(" ")).? ^^ const()
+    def **|+(i: Int): Parser[Unit] = rep(" ") ~> this(i) <~ rep(" ") | rep1(" ") ^^ const()
+  }
 }
 
 trait RabbitTokenParser {
@@ -95,17 +98,22 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
   val reserved = List("var", "function")
 
   def expr(i: Int): Parser[RabbitTree] = (
-      identifier ~ (rep(" ") ~ ":" ~ rep(" ") ~ "=" ~ indent4(rep(" "))(i + 2)()(rep(" "))) ~ expr1(i) ^^ {
+/*
+      identifier ~ (rep(" ") ~ ("\n" ~ rep(" ")).? ~ ":" ~ rep(" ") ~ "=" ~ rep(" ") ~ ("\n" ~ rep(" ")).?) ~ expr1(i) ^^ {
+*/
+      identifier ~ (indent.**|*(0) ~ ":" ~ rep(" ") ~ "=" ~ indent.**|*(0)) ~ expr1(i) ^^ {
         case n ~ _ ~ v => VarDefTree(n, v)
       }
     | expr1(i)
   )
 
   def expr1(i: Int): Parser[RabbitTree] = (
-    expr2(i) ~ (indent4(rep(" "))(i + 2)()(rep(" ")) ~ ("+" | "-") ~ indent4(rep(" "))(i + 2)()(rep1(" ")) ~ expr2(i)).* ^^ {
+    expr2(i) ~ rep(
+      (indent.**|*(0) ~> ("+" | "-") <~ indent.**|+(0)) ~ expr2(i)
+    ) ^^ {
       case x ~ list => (x /: list) {(l, y) =>
         y match {
-          case _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
+          case op ~ r => BinaryOpTree(op, l, r)
         }
       }
     }
@@ -113,27 +121,35 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
 
   def expr2(i: Int): Parser[RabbitTree] = (
     expr3(i) ~ (
-      indent4(rep(" "))(i + 2)()(rep(" ")) ~ ("*" | "//" | "/" | "%%" | "%") ~ indent4(rep(" "))(i + 2)()(rep1(" ")) ~ expr3(i)
+      (indent.**|*(0) ~> ("*" | "//" | "/" | "%%" | "%") <~ indent.**|+(0)) ~ expr3(i)
     ).* ^^ {
       case x ~ list => (x /: list) {(l, y) =>
         y match {
-          case _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
+          case op ~ r => BinaryOpTree(op, l, r)
         }
       }
     }
   )
 
   def expr3(i: Int): Parser[RabbitTree] = (
-      term(i) ~ indent4(rep(" "))(i + 2)()(rep(" ")) ~ "**" ~ indent4(rep(" "))(i + 2)()(rep1(" ")) ~ expr3(i) ^^ {
-        case l ~ _ ~ op ~ _ ~ r => TwoOpTree(op, l, r)
+      term(i) ~ (indent.**|*(0) ~> "**" <~ indent.**|+(0)) ~ expr3(i) ^^ {
+        case l ~ op ~ r => BinaryOpTree(op, l, r)
       }
     | term(i)
   )
 
-  def term(i: Int): Parser[RabbitTree] =
-    num | string | (
-      "(" ~> indent4(rep(" "))(0)(rep(" "))(rep(" ")) ~> expr(0) <~ indent4(rep(" "))(i)(rep(" "))(rep(" ")) <~ ")"
-    ) | failure("no term found")
+  def term(i: Int): Parser[RabbitTree] = (
+      num
+    | ("+" | "-" | "*" | "/" | "%") ~ term(i) ^^ {
+        case op ~ v => UnaryOpTree(op, v)
+      }
+    | string
+    | "(" ~> indent.**|*(0) ~> expr(0) <~ indent.**|*(0) <~ ")"
+    | failure("no term found")
+  )
 
-  def parse(s: String) = parseAll(expr(0), s)
+  def block(i: Int): Parser[BlockTree] =
+    repsep(expr(i).?, indent.*(i)) ^^ (xs => BlockTree(xs collect {case Some(x) => x}))
+
+  def parse(s: String) = parseAll(block(0), s)
 }
