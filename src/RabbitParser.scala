@@ -95,17 +95,14 @@ trait RabbitTypeParser {
 
 class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitTypeParser{
   override val skipWhitespace = false
-  val reserved = List("var", "function")
+  val reserved = List("var", "if", "else", "function")
 
-  def expr(i: Int): Parser[RabbitTree] = (
-/*
-      identifier ~ (rep(" ") ~ ("\n" ~ rep(" ")).? ~ ":" ~ rep(" ") ~ "=" ~ rep(" ") ~ ("\n" ~ rep(" ")).?) ~ expr1(i) ^^ {
-*/
-      identifier ~ (indent.**|*(0) ~ ":" ~ rep(" ") ~ "=" ~ indent.**|*(0)) ~ expr1(i) ^^ {
-        case n ~ _ ~ v => VarDefTree(n, v)
-      }
-    | expr1(i)
+  def stmt(i: Int): Parser[RabbitTree] = (
+      varDef(i)
+    | condStmt(i)
+    | expr(i)
   )
+  def expr(i: Int): Parser[RabbitTree] = expr1(i)
 
   def expr1(i: Int): Parser[RabbitTree] = (
     expr2(i) ~ rep(
@@ -156,13 +153,26 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
         case op ~ v => UnaryOpTree(op, v)
       }
     | string
-    | "(" ~> indent.**|*(0) ~> expr(0) <~ indent.**|*(0) <~ ")"
+    | "(" ~> indent.**|*(0) ~> stmt(0) <~ indent.**|*(0) <~ ")"
     | identifier ^^ VarRefTree
     | failure("no term found")
   )
 
+  def varDef(i: Int): Parser[VarDefTree] =
+    identifier ~ (indent.**|*(0) ~ ":" ~ rep(" ") ~ "=" ~ indent.**|*(0)) ~ expr(i) ^^ {
+      case n ~ _ ~ v => VarDefTree(n, v)
+    }
+
+  def condStmt(i: Int): Parser[CondTree] = (
+      ("if" | "unless") ~ (rep1(" ") ~> expr(i) <~ (indent.*(i + 2) | rep1(" ") ~ "then" ~ rep1(" "))) ~ block(i + 2)
+    ~ (indent(i) ~ "else" ~ indent(i + 2) ~> block(i + 2) | indent(i) ~ "else" ~ rep1(" ") ~> condStmt(i)).? ^^ {
+        case "if" ~ i ~ t ~ e => IfTree(i, t, e)
+        case "unless" ~ i ~ t ~ e => UnlessTree(i, t, e)
+      }
+  )
+
   def block(i: Int): Parser[BlockTree] =
-    repsep(expr(i).?, indent.*(i)) ^^ (xs => BlockTree(xs collect {case Some(x) => x}))
+    repsep(stmt(i).?, indent.*(i)) ^^ (xs => BlockTree(xs collect {case Some(x) => x}))
 
   def parse(s: String) = parseAll(block(0), s)
 }

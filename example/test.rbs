@@ -1,2 +1,17 @@
 i := 10 * -(2 + 3)
-i == -50
+if i == -50
+  j := i // 3
+  unless i == -50
+    "NG"
+    "NG"
+  else if j == -17
+    "OK"
+    "OK"
+  else unless j == -16
+    "NG"
+    "NG"
+  else
+    "NG"
+    "NG"
+  j + 2
+i + 2
