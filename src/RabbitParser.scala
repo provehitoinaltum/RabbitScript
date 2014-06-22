@@ -91,13 +91,40 @@ trait RabbitTokenParser {
   )
 }
 
+trait RabbitPatternParser {
+  self: RabbitParser =>
+
+  def pattern: Parser[PatternTree] = pattern1
+
+  def pattern1: Parser[PatternTree] = ptype | pattern2
+
+  def ptype: Parser[TypePatternTree] = pattern2 ~ (rep(" ") ~ ":" ~ rep(" ")) ~ tidentifier ^^ {
+    case p ~ _ ~ t => TypePatternTree(t, p)
+  }
+
+  def pattern2: Parser[PatternTree] = pvar | ptuple | pterm
+
+  def pterm: Parser[PatternTree] = pvar | ptuple | "(" ~> rep(" ") ~> pattern <~ rep(" ") <~ ")"
+
+  def pvar: Parser[VarPatternNode] = identifier ^^ VarPatternNode
+
+  def ptuple: Parser[TuplePatternTree] =
+    ("(" ~ rep(" ")) ~> pattern ~ rep(rep(" ") ~ "," ~ rep(" ") ~> pattern) <~ (rep(" ") ~ ")") ^^ {
+      case p0 ~ ps => TuplePatternTree(p0 :: ps)
+    }
+}
+
 trait RabbitTypeParser {
   self: RabbitParser =>
 
-  def tterm: Parser[RabbitTree] = identifier ^^ StringNode("#")
+//  def tterm: Parser[RabbitTree] = identifier ^^ StringNode("#")
+  def tidentifier: Parser[String] =
+    """[A-Z][a-zA-Z0-9_]*""".r ^? ({
+      case id if !(reserved contains id) => id
+    }, id => s"""reserved word "$id" can't be used as identifier""")
 }
 
-class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitTypeParser{
+class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitPatternParser with RabbitTypeParser{
   override val skipWhitespace = false
   val reserved = List("true", "false", "var", "if", "else", "while", "until", "for", "in", "function")
 
@@ -165,8 +192,8 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
   )
 
   def varDef(i: Int): Parser[VarDefTree] =
-    identifier ~ (indent.**|*(0) ~ ":" ~ rep(" ") ~ "=" ~ indent.**|*(0)) ~ expr(i) ^^ {
-      case n ~ _ ~ v => VarDefTree(n, v)
+    pattern ~ (rep(" ") ~ ":=" ~ indent.**|*(0)) ~ expr(i) ^^ {
+      case p ~ _ ~ v => VarDefTree(p, v)
     }
 
   def condStmt(i: Int): Parser[CondTree] = (
@@ -183,7 +210,7 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
         case "while" ~ i ~ t ~ e => WhileTree(i, t, e)
         case "until" ~ i ~ t ~ e => UntilTree(i, t, e)
       }
-    | ("for" ~> rep1(" ") ~> identifier <~ rep1(" "))
+    | ("for" ~> rep1(" ") ~> pattern <~ rep1(" "))
     ~ ("in" ~> rep1(" ") ~> expr(i) <~ (indent.*(i + 2) | rep1(" ") ~ "do" ~ rep1(" "))) ~ block(i + 2) ^^ {
         case v ~ e ~ b => ForTree(v, e, b)
       }
