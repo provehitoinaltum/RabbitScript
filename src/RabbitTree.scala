@@ -3,14 +3,14 @@ package org.rabbitscript.trees
 sealed trait RabbitTree {
   def debugJavaScript: String
 }
-abstract class ValueTree extends RabbitTree
-case class IntTree(value: Int) extends ValueTree {
+abstract class RabbitLeaf extends RabbitTree
+case class IntNode(value: Int) extends RabbitLeaf {
   def debugJavaScript = value.toString()
 }
-case class FloatTree(value: Double) extends ValueTree {
+case class FloatNode(value: Double) extends RabbitLeaf {
   def debugJavaScript = value.toString()
 }
-case class StringTree(quote: String)(value: String) extends ValueTree {
+case class StringNode(quote: String)(value: String) extends RabbitLeaf {
   def debugJavaScript = s
   private lazy val s = {
     val s = value.replace("\\", "\\\\")
@@ -24,17 +24,17 @@ case class StringTree(quote: String)(value: String) extends ValueTree {
     ) + quote
   }
 }
-case class BooleanTree(value: Boolean) extends ValueTree {
+case class BooleanNode(value: Boolean) extends RabbitLeaf {
   def debugJavaScript = if(value) "true" else "false"
 }
-case class VarRefTree(name: String) extends RabbitTree {
+case class VarRefNode(name: String) extends RabbitLeaf {
   def debugJavaScript = name
 }
 case class UnaryOpTree(op: String, v: RabbitTree) extends RabbitTree {
   def debugJavaScript = {
     op + (
       v match {
-        case _: ValueTree => v.debugJavaScript
+        case _: RabbitLeaf => v.debugJavaScript
         case _ => "(" + v.debugJavaScript + ")"
       }
     )
@@ -44,14 +44,12 @@ case class BinaryOpTree(op: String, l: RabbitTree, r: RabbitTree) extends Rabbit
   def debugJavaScript = {
     (
       l match {
-        case _: ValueTree => l.debugJavaScript
-        case _: VarRefTree => l.debugJavaScript
+        case _: RabbitLeaf => l.debugJavaScript
         case _ => "(" + l.debugJavaScript + ")"
       }
     ) + " " + op + " " + (
       r match {
-        case _: ValueTree => r.debugJavaScript
-        case _: VarRefTree => r.debugJavaScript
+        case _: RabbitLeaf => r.debugJavaScript
         case _ => "(" + r.debugJavaScript + ")"
       }
     )
@@ -109,8 +107,7 @@ case class ForTree(_var: String, expr: RabbitTree, block: RabbitTree) extends Lo
   def debugJavaScript =
     "for(" + _var + " in " + (
       expr match {
-        case _: ValueTree => expr.debugJavaScript
-        case _: VarRefTree => expr.debugJavaScript
+        case _: RabbitLeaf => expr.debugJavaScript
         case _ => "(" + expr.debugJavaScript + ")"
       }
     ) + "){\n" + block.debugJavaScript + "\n}"

@@ -25,7 +25,7 @@ trait RabbitTokenParser {
       case id if !(reserved contains id) => id
     }, id => s"""reserved word "$id" can't be used as identifier""")
 
-  def num: Parser[ValueTree] = (
+  def num: Parser[RabbitLeaf] = (
       ("+" | "-").? ~ (
           "[1-9][0-9]*+".r ^^ (_.toInt)
         | "0" ^^ const(0)
@@ -36,15 +36,15 @@ trait RabbitTokenParser {
           | err("decimal number literal must have decimal part (not only decimal point)")
         )
       ).? ^^ {
-        case Some("-") ~ intPart ~ Some(decPart) => FloatTree(-(intPart + "." + decPart).toDouble)
-        case _         ~ intPart ~ Some(decPart) => FloatTree((intPart + "." + decPart).toDouble)
-        case Some("-") ~ intPart ~ None => IntTree(-intPart)
-        case _         ~ intPart ~ None => IntTree(intPart)
+        case Some("-") ~ intPart ~ Some(decPart) => FloatNode(-(intPart + "." + decPart).toDouble)
+        case _         ~ intPart ~ Some(decPart) => FloatNode((intPart + "." + decPart).toDouble)
+        case Some("-") ~ intPart ~ None => IntNode(-intPart)
+        case _         ~ intPart ~ None => IntNode(intPart)
       }
     | ("+" | "-") ~> failure("number literal expected but not found")
   )
 
-  def oneQuoteString(quote: String): Parser[StringTree] = (
+  def oneQuoteString(quote: String): Parser[StringNode] = (
     quote ~>
       rep(
           "\\" ~> (
@@ -67,35 +67,34 @@ trait RabbitTokenParser {
         | s"[^$quote\\\\]+".r
       )
     <~ (quote | failure("illegal end of string"))
-    ^^ (_.mkString) ^^ StringTree(quote)
+    ^^ (_.mkString) ^^ StringNode(quote)
   )
 
-  def threeQuoteString(quote: String): Parser[StringTree] = (
+  def threeQuoteString(quote: String): Parser[StringNode] = (
     repN(3, quote) ~>
       rep(s"$quote{0,2}".r ~ (
             s"[^$quote]+".r
-//        | ...
         ) ^^ { case q ~ s => q + s }
       )
     <~ (repN(3, quote) | failure("illegal end of string"))
-    ^^ (_.mkString) ^^ StringTree(quote)
+    ^^ (_.mkString) ^^ StringNode(quote)
   )
 
-  def string: Parser[StringTree] = (
+  def string: Parser[StringNode] = (
     threeQuoteString("\"") | threeQuoteString("'")
     | oneQuoteString("\"") | oneQuoteString("'")
   )
 
-  def bool: Parser[BooleanTree] = (
-     "false" ^^ const(BooleanTree(false))
-    | "true" ^^ const(BooleanTree(true))
+  def bool: Parser[BooleanNode] = (
+     "false" ^^ const(BooleanNode(false))
+    | "true" ^^ const(BooleanNode(true))
   )
 }
 
 trait RabbitTypeParser {
   self: RabbitParser =>
 
-  def tterm: Parser[RabbitTree] = identifier ^^ StringTree("#")
+  def tterm: Parser[RabbitTree] = identifier ^^ StringNode("#")
 }
 
 class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitTypeParser{
@@ -161,7 +160,7 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
     | string
     | bool
     | "(" ~> indent.**|*(0) ~> stmt(0) <~ indent.**|*(0) <~ ")"
-    | identifier ^^ VarRefTree
+    | identifier ^^ VarRefNode
     | failure("no term found")
   )
 
