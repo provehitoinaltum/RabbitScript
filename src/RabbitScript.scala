@@ -9,7 +9,8 @@ object RabbitScript {
       rp parse _.getLines.mkString("\n") match {
         case rp.Success(tree, _) =>
           println(tree)
-          println(tree.debugJavaScript)
+          for(x <- tree.debugJavaScript.lines)
+            println(x drop 2)
         case x =>
           println(x)
       }

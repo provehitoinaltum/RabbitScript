@@ -95,11 +95,12 @@ trait RabbitTypeParser {
 
 class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitTypeParser{
   override val skipWhitespace = false
-  val reserved = List("var", "if", "else", "function")
+  val reserved = List("var", "if", "else", "while", "until", "for", "in", "function")
 
   def stmt(i: Int): Parser[RabbitTree] = (
       varDef(i)
     | condStmt(i)
+    | loopStmt(i)
     | expr(i)
   )
   def expr(i: Int): Parser[RabbitTree] = expr1(i)
@@ -168,6 +169,18 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
     ~ (indent(i) ~ "else" ~ indent(i + 2) ~> block(i + 2) | indent(i) ~ "else" ~ rep1(" ") ~> condStmt(i)).? ^^ {
         case "if" ~ i ~ t ~ e => IfTree(i, t, e)
         case "unless" ~ i ~ t ~ e => UnlessTree(i, t, e)
+      }
+  )
+
+  def loopStmt(i: Int): Parser[LoopTree] = (
+      ("while" | "until") ~ (rep1(" ") ~> expr(i) <~ (indent.*(i + 2) | rep1(" ") ~ "do" ~ rep1(" "))) ~ block(i + 2)
+    ~ (indent(i) ~ "else" ~ indent(i + 2) ~> block(i + 2) | indent(i) ~ "else" ~ rep1(" ") ~> condStmt(i)).? ^^ {
+        case "while" ~ i ~ t ~ e => WhileTree(i, t, e)
+        case "until" ~ i ~ t ~ e => UntilTree(i, t, e)
+      }
+    | ("for" ~> rep1(" ") ~> identifier <~ rep1(" "))
+    ~ ("in" ~> rep1(" ") ~> expr(i) <~ (indent.*(i + 2) | rep1(" ") ~ "do" ~ rep1(" "))) ~ block(i + 2) ^^ {
+        case v ~ e ~ b => ForTree(v, e, b)
       }
   )
 

@@ -11,7 +11,8 @@ case class FloatTree(value: Double) extends ValueTree {
   def debugJavaScript = value.toString()
 }
 case class StringTree(quote: String)(value: String) extends ValueTree {
-  lazy val debugJavaScript = {
+  def debugJavaScript = s
+  private lazy val s = {
     val s = value.replace("\\", "\\\\")
                  .replace("\t", "\\t")
                  .replace("\n", "\\n")
@@ -59,7 +60,7 @@ case class VarDefTree(name: String, value: RabbitTree) extends RabbitTree {
 abstract class CondTree extends RabbitTree
 case class IfTree(cond: RabbitTree, _if: RabbitTree, _else: Option[RabbitTree]) extends CondTree {
   def debugJavaScript =
-    "if(" + cond.debugJavaScript + ")" + "{\n" + _if.debugJavaScript + "\n}" + (
+    "if(" + cond.debugJavaScript + "){\n" + _if.debugJavaScript + "\n}" + (
       _else match {
         case Some(e: CondTree) => "else " + e.debugJavaScript
         case Some(e) => "else{\n" + e.debugJavaScript + "\n}"
@@ -69,7 +70,7 @@ case class IfTree(cond: RabbitTree, _if: RabbitTree, _else: Option[RabbitTree]) 
 }
 case class UnlessTree(cond: RabbitTree, _unless: RabbitTree, _else: Option[RabbitTree]) extends CondTree {
   def debugJavaScript =
-    "if(!(" + cond.debugJavaScript + "))" + "{\n" + _unless.debugJavaScript + "\n}" + (
+    "if(!(" + cond.debugJavaScript + ")){\n" + _unless.debugJavaScript + "\n}" + (
       _else match {
         case Some(e: CondTree) => "else " + e.debugJavaScript
         case Some(e) => "else{\n" + e.debugJavaScript + "\n}"
@@ -77,7 +78,41 @@ case class UnlessTree(cond: RabbitTree, _unless: RabbitTree, _else: Option[Rabbi
       }
     )
 }
+abstract class LoopTree extends RabbitTree
+case class WhileTree(cond: RabbitTree, _while: RabbitTree, _else: Option[RabbitTree]) extends LoopTree {
+  def debugJavaScript =
+    _else match {
+      case Some(e) => (
+          "var _break=false;\nwhile(" + cond.debugJavaScript + "){\n" + _while.debugJavaScript + "\n}\n"
+        + "if(_break){\n" + e.debugJavaScript + "\n}"
+        )
+      case None =>
+        "while(" + cond.debugJavaScript + "){\n" + _while.debugJavaScript + "\n}"
+    }
+}
+case class UntilTree(cond: RabbitTree, _until: RabbitTree, _else: Option[RabbitTree]) extends LoopTree {
+  def debugJavaScript =
+    _else match {
+      case Some(e) => (
+          "var __break=false;\n"
+        + "while(!(" + cond.debugJavaScript + "))" + "{\n" + _until.debugJavaScript + "\n}\n"
+        + "if(!__break){\n" + e.debugJavaScript + "\n}"
+        )
+      case None =>
+        "while(!(" + cond.debugJavaScript + "))" + "{\n" + _until.debugJavaScript + "\n}"
+    }
+}
+case class ForTree(_var: String, expr: RabbitTree, block: RabbitTree) extends LoopTree {
+  def debugJavaScript =
+    "for(" + _var + " in " + (
+      expr match {
+        case _: ValueTree => expr.debugJavaScript
+        case _: VarRefTree => expr.debugJavaScript
+        case _ => "(" + expr.debugJavaScript + ")"
+      }
+    ) + "){\n" + block.debugJavaScript + "\n}"
+}
 case class BlockTree(stmts: List[RabbitTree]) extends RabbitTree {
   def debugJavaScript = 
-    (stmts map (_.debugJavaScript) mkString ";\n") + ";"
+    ((stmts map (x => x.debugJavaScript) mkString ";\n").lines map ("  " + _) mkString "\n") + ";"
 }

@@ -8,10 +8,17 @@ if i == -50
     "OK"
     "OK"
   else unless j == -16
-    "NG"
+    for x in 10
+      "NG"
+      "NG"
     "NG"
   else
-    "NG"
-    "NG"
+    while true
+      "NG"
+      "NG"
+    else
+      "NG"
+      "NG"
+      "NG"
   j + 2
 i + 2
