@@ -85,6 +85,11 @@ trait RabbitTokenParser {
     threeQuoteString("\"") | threeQuoteString("'")
     | oneQuoteString("\"") | oneQuoteString("'")
   )
+
+  def bool: Parser[BooleanTree] = (
+     "false" ^^ const(BooleanTree(false))
+    | "true" ^^ const(BooleanTree(true))
+  )
 }
 
 trait RabbitTypeParser {
@@ -95,7 +100,7 @@ trait RabbitTypeParser {
 
 class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitTypeParser{
   override val skipWhitespace = false
-  val reserved = List("var", "if", "else", "while", "until", "for", "in", "function")
+  val reserved = List("true", "false", "var", "if", "else", "while", "until", "for", "in", "function")
 
   def stmt(i: Int): Parser[RabbitTree] = (
       varDef(i)
@@ -154,6 +159,7 @@ class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitToken
         case op ~ v => UnaryOpTree(op, v)
       }
     | string
+    | bool
     | "(" ~> indent.**|*(0) ~> stmt(0) <~ indent.**|*(0) <~ ")"
     | identifier ^^ VarRefTree
     | failure("no term found")

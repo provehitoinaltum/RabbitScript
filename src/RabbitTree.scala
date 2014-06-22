@@ -24,6 +24,9 @@ case class StringTree(quote: String)(value: String) extends ValueTree {
     ) + quote
   }
 }
+case class BooleanTree(value: Boolean) extends ValueTree {
+  def debugJavaScript = if(value) "true" else "false"
+}
 case class VarRefTree(name: String) extends RabbitTree {
   def debugJavaScript = name
 }
