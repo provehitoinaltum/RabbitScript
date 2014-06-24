@@ -1,1 +1,1 @@
-(a, b: Int): Tuple := true
+(a, b: Int): Tuple := "\n\\\n\"\n"

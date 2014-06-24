@@ -18,4 +18,16 @@ object Lib {
   }
   implicit val disposer       = generateCloser[{def dispose()}](_.dispose)
   implicit val closer         = generateCloser[{def close()}]  (_.close)
+  implicit class AString(self: String) {
+    def eachLine(f: String => Unit) = self.lines foreach f
+    def mapLines[T](f: String => T) = self.lines map f mkString "\n"
+    def replaceWithMap(m: Map[String, String]) = {
+      def replaceWithList(s: String, l: List[(String, String)]): String =
+        l match {
+          case (b, a) :: ls => replaceWithList(s.replace(b, a), ls)
+          case Nil => s
+        }
+      replaceWithList(self, m.toList)
+    }
+  }
 }

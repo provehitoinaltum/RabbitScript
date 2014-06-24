@@ -1,4 +1,6 @@
 package org.rabbitscript
+import net.akouryy.common.Lib._
+
 import util.parsing.combinator._
 import trees._
 import Function.const

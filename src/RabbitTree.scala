@@ -1,4 +1,5 @@
 package org.rabbitscript.trees
+import net.akouryy.common.Lib._
 
 sealed trait RabbitTree {
   def debugJavaScript: String
@@ -13,12 +14,16 @@ case class FloatNode(value: Double) extends RabbitLeaf {
 case class StringNode(quote: String)(value: String) extends RabbitLeaf {
   def debugJavaScript = s
   private lazy val s = {
-    val s = value.replace("\\", "\\\\")
-                 .replace("\t", "\\t")
-                 .replace("\n", "\\n")
-                 .replace("\r", "\\r")
-                 .replace("\0", "\\0")
-                 .replace(quote, s"\\$quote")
+    val s =
+      value.replaceWithMap(
+        Map("\\" -> "\\\\",
+            "\t" -> "\\t",
+            "\n" -> "\\n",
+            "\r" -> "\\r",
+            "\0" -> "\\0",
+            quote -> s"\\$quote"
+        )
+      )
     quote + (
       "[\u0000-\u001f]".r replaceAllIn (s, m => "\\\\u%04x" format m.toString()(0).toInt)
     ) + quote
@@ -124,6 +129,5 @@ case class ForTree(pattern: PatternTree, expr: RabbitTree, block: RabbitTree) ex
     ) + "){\n" + block.debugJavaScript + "\n}"
 }
 case class BlockTree(stmts: List[RabbitTree]) extends RabbitTree {
-  def debugJavaScript = 
-    ((stmts map (x => x.debugJavaScript) mkString ";\n").lines map ("  " + _) mkString "\n") + ";"
+  def debugJavaScript = ((stmts map (x => x.debugJavaScript) mkString ";\n") mapLines ("  " + _)) + ";"
 }
