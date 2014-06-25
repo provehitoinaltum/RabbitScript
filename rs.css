@@ -1,17 +1,21 @@
 :root{
 	counter-reset: line-num;
 }
-code.js, code.rabbit{
+code.js, code.rabbit, code.r-error{
 	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
 	word-break: break-all;
+}
+code.r-error{
+	color: #f00;
 }
 code.js .statement:not(:last-child),
 code.rabbit .statement:not(:last-child){
 	border-bottom: 1px dotted #cc9;
 }
 code.js .line,
-code.rabbit .line{
+code.rabbit .line,
+code.r-error .line{
 	display: block;
 }
 code.js .line:before

@@ -18,9 +18,6 @@ code.js{
 code.rabbit, code.r-error{
 	background: rgba(255, 255, 225, 0.7);
 }
-code.r-error{
-	color: #f00;
-}
 code:not([class]){
 	font-style: italic;
 	padding-right: 0.25em;
