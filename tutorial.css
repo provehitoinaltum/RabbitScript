@@ -23,4 +23,5 @@ code.r-error{
 }
 code:not([class]){
 	font-style: italic;
+	padding-right: 0.25em;
 }
