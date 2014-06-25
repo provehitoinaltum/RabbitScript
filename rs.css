@@ -1,35 +1,47 @@
 :root{
 	counter-reset: line-num;
 }
-code.rabbit{
+code.js, code.rabbit{
 	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
 	word-break: break-all;
 }
+code.js .statement:not(:last-child),
 code.rabbit .statement:not(:last-child){
 	border-bottom: 1px dotted #cc9;
 }
+code.js .line,
+code.rabbit .line{
+	display: block;
+}
+code.js .line:before
 code.rabbit .line:before{
 	color: #999;
 	counter-increment: line-num;
 	content: counter(line-num);
 }
+code.js .kw,
 code.rabbit .kw{
 	color: #00f;
 }
+code.js .op,
 code.rabbit .op{
 	color: #555;
 }
+code.js .num,
 code.rabbit .num{
 	color: #01c;
 }
+code.js .str,
 code.rabbit .str{
 	color: #071;
 }
+code.js .comment,
 code.rabbit .comment{
 	color: #496;
 	font-style: italic;
 }
+code.js a[href],
 code.rabbit a[href]{
 	color: inherit !important;
 	text-decoration: underline;

@@ -58,3 +58,8 @@ h1 img{
 	color: inherit !important;
 	text-decoration: none;
 }
+
+em{
+	font-style: normal;
+	font-weight: bold;
+}
