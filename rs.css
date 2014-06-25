@@ -9,8 +9,8 @@ code.js, code.rabbit, code.r-error{
 code.r-error{
 	color: #f00;
 }
-code.js .statement:not(:last-child),
-code.rabbit .statement:not(:last-child){
+code.js .line:not(:last-child),
+code.rabbit .line:not(:last-child){
 	border-bottom: 1px dotted #cc9;
 }
 code.js .line,
