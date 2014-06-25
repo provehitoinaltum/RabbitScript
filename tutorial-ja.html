@@ -35,13 +35,14 @@
 			<h1>RabbitScriptの世界にようこそ!</h1>
 			<p>
 				RabbitScriptは、安全な型システムと簡潔な文法を特徴とするaltJS言語です。<br />
-				ほかにも次のような特徴があります。
+				次のような特徴があります。
 				<ul>
 					<li>完全純粋なオブジェクト指向</li>
 					<li>型推論</li>
 					<li>パターンマッチング</li>
 					<li>既存のクラスを拡張可能な限定トレイト</li>
 					<li>高階関数、ラムダ式と構文糖衣</li>
+					<li>型安全なマクロシステム</li>
 				</ul>
 			</p>
 			<section>
@@ -54,7 +55,7 @@
 					<p>
 						数値リテラルには、整数リテラル、浮動小数点数リテラル、分数リテラル、虚数リテラルの4種類があります。<br />
 						整数リテラルには10進、8進、16進、2進専用のリテラルと任意の進数のリテラルがあります。<br />
-						10進リテラルは、0から9の数字を使う一般的なものです。<br />
+						10進リテラルは、<code>0</code>から<code>9</code>の数字を使う一般的なものです。<br />
 						<code class="rabbit">
 							<span class="line statement">
 								<span class="num">100</span>
@@ -70,14 +71,31 @@
 							<span class="line statement">
 								<span class="num">-114514</span>;
 							</span>
+						</code><br />
+						10進であることを明示したい場合、<code>0d</code>を先頭につけることができます。<br />
+						<code class="rabbit">
+							<span class="line statement">
+								<span class="num">0d100</span>
+							</span>
+							<span class="line statement">
+								<span class="num">+0d114514</span>
+							</span>
 						</code>
-						8進リテラルは、0oに続けて0から7の数字で表します。<br />
+						<code class="js">
+							<span class="line statement">
+								<span class="num">100</span>;
+							</span>
+							<span class="line statement">
+								<span class="num">+114514</span>;
+							</span>
+						</code><br />
+						8進リテラルは、<code>0o</code>に続けて<code>0</code>から<code>7</code>の数字で表します。<br />
 						<code class="rabbit">
 							<span class="line statement">
 								<span class="num">0o100</span>
 							</span>
 							<span class="line statement">
-								<span class="num">+0o114514</span>
+								<span class="num">-0o114514</span>
 							</span>
 						</code>
 						<code class="js">
@@ -87,7 +105,24 @@
 							<span class="line statement">
 								<span class="num">-0x994c</span>;
 							</span>
+						</code><br />
+						<code>0d</code>が付かない10進リテラルを<code>0</code>から始めたり、8進リテラルで<code>0o</code>の<code>o</code>を省略することはできません。<br />
+						<code class="rabbit">
+							<span class="line statement">
+								<span class="num">0100</span>
+							</span>
+							<span class="line statement">
+								<span class="num">099999</span>
+							</span>
 						</code>
+						<code class="r_error">
+							<span class="line statement">
+								parse error; maybe you meant 0d0100 or 0o100
+							</span>
+							<span class="line statement">
+								parse error; maybe you meant 0d099999
+							</span>
+						</code><br />
 					</p>
 				</section>
 			</section>
