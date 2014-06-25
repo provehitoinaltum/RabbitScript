@@ -59,6 +59,10 @@ h1 img{
 	text-decoration: none;
 }
 
+code{
+	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
+	word-break: break-all;
+}
 em{
 	font-style: normal;
 	font-weight: bold;

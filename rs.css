@@ -2,9 +2,7 @@
 	counter-reset: line-num;
 }
 code.js, code.rabbit, code.r-error{
-	font-family: Consolas, Menlo, 'Liberation Mono', Courier, monospace;
 	font-size: 1em;
-	word-break: break-all;
 }
 code.r-error{
 	color: #f00;
