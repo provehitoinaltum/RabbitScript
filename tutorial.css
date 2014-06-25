@@ -1,3 +1,6 @@
+main{
+	margin-top: 1em;
+}
 section{
 	counter-reset: line-num;
 }
