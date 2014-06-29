@@ -16,18 +16,20 @@ object Lib {
       def apply(resource: A) = f(resource) 
     }
   }
-  implicit val disposer       = generateCloser[{def dispose()}](_.dispose)
-  implicit val closer         = generateCloser[{def close()}]  (_.close)
+  implicit val closer   = generateCloser[{def close()}]  (_.close)
+  implicit val disposer = generateCloser[{def dispose()}](_.dispose)
+
   implicit class AString(self: String) {
     def eachLine(f: String => Unit) = self.lines foreach f
-    def mapLines[T](f: String => T) = self.lines map f mkString "\n"
-    def replaceWithMap(m: Map[String, String]) = {
-      def replaceWithList(s: String, l: List[(String, String)]): String =
+    def mapLines(f: String => String) = self.lines map f mkString "\n"
+    def replaceWithList(l: List[(String, String)]) = {
+      def replaceWithList2(s: String, l: List[(String, String)]): String =
         l match {
-          case (b, a) :: ls => replaceWithList(s.replace(b, a), ls)
+          case (b, a) :: ls => replaceWithList2(s.replace(b, a), ls)
           case Nil => s
         }
-      replaceWithList(self, m.toList)
+        replaceWithList2(self, l)
     }
+    def replaceWithMap(m: Map[String, String]) = replaceWithList(m.toList)
   }
 }

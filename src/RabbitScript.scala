@@ -3,7 +3,7 @@ import net.akouryy.common.Lib._
 
 object RabbitScript {
   def main(args: Array[String]) {
-    using(io.Source.fromFile(args(0))) {
+    using(io.Source fromFile args(0)) {
       val rp = new RabbitParser
       rp parse _.getLines.mkString("\n") match {
         case rp.Success(tree, _) =>
