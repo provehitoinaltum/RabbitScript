@@ -50,22 +50,17 @@
 				<section>
 					<h1>リテラル</h1>
 					<p>
-						RabbitScriptには、数値、文字列、リスト、マップの4種類のリテラルがある。
-					</p>
-					<p>
-						数値リテラルには、整数リテラル、浮動小数点数リテラル、分数リテラル、虚数リテラルの4種類があります。<br />
-						整数リテラルには10進、8進、16進、2進専用のリテラルと任意の進数のリテラルがあります。<br />
-						10進リテラルは、<code>0</code>から<code>9</code>の数字を使う一般的なものです。
-						10進であることを明示したい場合、<code>0d</code>を先頭につけることができます。<br />
+						RabbitScriptには、数値、文字列、リスト、マップの4種類のリテラルがあります。<br />
+						数値リテラルの例 <a href="doc/syntax/num.html">詳細</a><br />
 						<code class="rabbit">
 							<span class="line statement">
 								<span class="num">100</span>
 							</span>
 							<span class="line statement">
-								<span class="num">-114514</span>
+								<span class="num">-0o114514</span>
 							</span>
 							<span class="line statement">
-								<span class="num">+0d1397552685</span>
+								<span class="num">+0n{20}1g</span>
 							</span>
 						</code>
 						<code class="js">
@@ -73,77 +68,13 @@
 								<span class="num">100</span>;
 							</span>
 							<span class="line statement">
-								<span class="num">-114514</span>;
-							</span>
-							<span class="line statement">
-								<span class="num">+1397552685</span>;
-							</span>
-						</code><br />
-						16進リテラルは、<code>0x</code>に続けて<code>0</code>から<code>9</code>の数字と<code>a</code>から<code>f</code>のアルファベットで表します。<br />
-						同様に8進リテラルは<code>0o</code>に続けて<code>0</code>から<code>7</code>の数字で、2進リテラルは<code>0b</code>に続けて<code>0</code>または<code>1</code>の数字で表します。<br />
-						<code class="rabbit">
-							<span class="line statement">
-								<span class="num">0x100</span>
-							</span>
-							<span class="line statement">
-								<span class="num">-0o114514</span>
-							</span>
-							<span class="line statement">
-								<span class="num">+0b1010011010011001111011000101101</span>
-							</span>
-						</code>
-						<code class="js">
-							<span class="line statement">
-								<span class="num">0x100</span>;
-							</span>
-							<span class="line statement">
 								<span class="num">-0x994c</span>;
 							</span>
 							<span class="line statement">
-								<span class="num">+0x534cf62d</span>;
+								<span class="num">+36</span>;
 							</span>
 						</code><br />
-						<code>0d</code>が付かない10進リテラルを<code>0</code>から始めたり、8進リテラルの<code>0o</code>の<code>o</code>を省略することはできません。<br />
-						<code class="rabbit">
-							<span class="line statement">
-								<span class="num">0100</span>
-							</span>
-							<span class="line statement">
-								<span class="num">099999</span>
-							</span>
-						</code>
-						<code class="r-error">
-							<span class="line">
-								Parse error. Maybe you meant 0d0100 or 0o100
-							</span>
-							<span class="line">
-								Parse error. Maybe you meant 0d099999
-							</span>
-						</code><br />
-						任意の進数のリテラルは、<code>0n</code>に続けて10進で表記した進数を<code>{</code>、<code>}</code>で囲み、数値やアルファベットを続けて表します。<br />
-						11進数以上のリテラルでアルファベットを使用する場合、大文字小文字のどちらも使えます。<br />
-						<code class="rabbit">
-							<span class="line statement">
-								<span class="num">0n{3}120</span>
-							</span>
-							<span class="line statement">
-								<span class="num">-0n{20}1g</span>
-							</span>
-							<span class="line statement">
-								<span class="num">+0n{36}ZZZZZ</span>
-							</span>
-						</code>
-						<code class="js">
-							<span class="line statement">
-								<span class="num">15</span>;
-							</span>
-							<span class="line statement">
-								<span class="num">-36</span>;
-							</span>
-							<span class="line statement">
-								<span class="num">+60466175</span>;
-							</span>
-						</code><br />
+						文字列リテラルの例 <a href="doc/syntax/string.html">詳細</a><br />
 					</p>
 				</section>
 			</section>
