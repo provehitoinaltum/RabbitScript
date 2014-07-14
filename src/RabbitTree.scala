@@ -15,19 +15,19 @@ case class StringNode(quote: String)(value: String) extends RabbitLeaf {
   def debugJavaScript = s
   private lazy val s = {
     val s =
-      value.replaceWithMap(
-        Map("\\" -> "\\\\",
-            "\t" -> "\\t",
-            "\n" -> "\\n",
-            "\r" -> "\\r",
-            "\0" -> "\\0",
-            quote -> s"\\$quote"
-        )
+      value.replaceWithTuples(
+        "\\" -> "\\\\",
+        "\t" -> "\\t",
+        "\n" -> "\\n",
+        "\r" -> "\\r",
+        "\0" -> "\\0",
+        quote -> s"\\$quote"
       )
     quote + (
       "[\u0000-\u001f]".r replaceAllIn (s, m => "\\\\u%04x" format m.toString()(0).toInt)
     ) + quote
   }
+  override def toString = "String(" + s + ")"
 }
 case class BooleanNode(value: Boolean) extends RabbitLeaf {
   def debugJavaScript = if(value) "true" else "false"
@@ -79,7 +79,6 @@ case class IfTree(cond: RabbitTree, _if: RabbitTree, _else: Option[RabbitTree]) 
   def debugJavaScript =
     "if(" + cond.debugJavaScript + "){\n" + _if.debugJavaScript + "\n}" + (
       _else match {
-        case Some(e: CondTree) => "else " + e.debugJavaScript
         case Some(e) => "else{\n" + e.debugJavaScript + "\n}"
         case None => ""
       }
@@ -89,7 +88,6 @@ case class UnlessTree(cond: RabbitTree, unless: RabbitTree, _else: Option[Rabbit
   def debugJavaScript =
     "if(!(" + cond.debugJavaScript + ")){\n" + unless.debugJavaScript + "\n}" + (
       _else match {
-        case Some(e: CondTree) => "else " + e.debugJavaScript
         case Some(e) => "else{\n" + e.debugJavaScript + "\n}"
         case None => ""
       }

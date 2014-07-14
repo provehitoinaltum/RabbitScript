@@ -5,18 +5,65 @@ import util.parsing.combinator._
 import trees._
 import Function.const
 
-trait RabbitIndentParser {
+trait RabbitSpaceParser {
   self: RabbitParser =>
 
-  object indent extends (Int => Parser[Unit]) {
-    def apply(i: Int): Parser[Unit] = "\n" ~ (" " * i) ^^ const()
-    def *(i: Int): Parser[Unit] = rep(" ") ~> this(i)
-    def *|*(i: Int): Parser[Unit] = rep(" ") ~ this(i).? ^^ const()
-    def *|+(i: Int): Parser[Unit] = rep(" ") ~> this(i) | rep1(" ") ^^ const()
-    def **(i: Int): Parser[Unit] = rep(" ") ~> this(i) <~ rep(" ")
-    def **|*(i: Int): Parser[Unit] = rep(" ") ~ (this(i) ~ rep(" ")).? ^^ const()
-    def **|+(i: Int): Parser[Unit] = rep(" ") ~> this(i) <~ rep(" ") | rep1(" ") ^^ const()
+  /** indent */
+  def  ind    (i: Int) = "\n" ~ (" " * i) ^^ const()
+  /** space* indent */
+  def sind    (i: Int) = rep(" ") ~ ind(i) ^^ const()
+  /** space* indent space* */
+  def sinds   (i: Int) = sind(i) ~ rep(" ") ^^ const()
+  /** indent? */
+  def  indp   (i: Int) = ind(i).? ^^ const()
+  /** space* indent? */
+  def sindp   (i: Int) = rep(" ") ~ indp(i) ^^ const()
+  /** space* indent? space* */
+  def sindps  (i: Int) = rep(" ") ~ (ind(i) ~ rep(" ")).? ^^ const()
+  /** indent | space+ */
+  def  ind_ss (i: Int) = ind(i) | rep1(" ") ^^ const()
+  /** space* indent | space+ */
+  def sind_ss (i: Int) = sind(i) | rep1(" ") ^^ const()
+  /** space* indent space* | space+ */
+  def sinds_ss(i: Int) = sinds(i) | rep1(" ") ^^ const()
+
+  private def some[T, U](f: Option[T] => U) = (x: T) => f(Some(x))
+  def with_ind     [T](i: Int)(f: Int => Parser[T]) = ind(i) ~> f(i)
+  def with_sind    [T](i: Int)(f: Int => Parser[T]) = sind(i) ~> f(i)
+  def with_sinds   [T](i: Int)(f: Int => Parser[T]) = {
+    var x = 0;
+    sind(i) ~ (rep(" ") ^^ {s => x = s.length}) ~> f(i + x)
   }
+  def with_indp    [T](i: Int)(f: Option[Int] => Parser[T]) = ind(i) ~> f(Some(i)) | f(None)
+  def with_sindp   [T](i: Int)(f: Option[Int] => Parser[T]) = sind(i) ~> f(Some(i)) | rep(" ") ~> f(None)
+  def with_sindps  [T](i: Int)(f: Option[Int] => Parser[T]) = with_sinds(i)(some(f)) | rep(" ") ~> f(None)
+  def with_ind_ss  [T](i: Int)(f: Option[Int] => Parser[T]) = ind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
+  def with_sind_ss [T](i: Int)(f: Option[Int] => Parser[T]) = sind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
+  def with_sinds_ss[T](i: Int)(f: Option[Int] => Parser[T]) = with_sinds(i)(some(f)) | rep1(" ") ~> f(None)
+
+/*
+  implicit class IndentParser[T](p: Parser[T]) {
+    def ~\(i: Int): Parser[T]     = p <~ ind(i)
+    def ~*\(i: Int): Parser[T]    = p <~ sind(i)
+    def ~*\*(i: Int): Parser[T]   = p <~ sinds(i)
+    def ~\?(i: Int): Parser[T]    = p <~ indp(i)
+    def ~*\?(i: Int): Parser[T]   = p <~ sindp(i)
+    def ~*\?*(i: Int): Parser[T]  = p <~ sindps(i)
+    def ~\|+(i: Int): Parser[T]   = p <~ ind_ss(i)
+    def ~*\|+(i: Int): Parser[T]  = p <~ sind_ss(i)
+    def ~*\*|+(i: Int): Parser[T] = p <~ sinds_ss(i)
+  }
+  import language.implicitConversions
+  implicit def StringToIndentParser(s: String) = IndentParser(s)
+  implicit def RegexToIndentParser(r: Regex) = IndentParser(r)
+*/
+
+  abstract sealed class Indent
+  case class StrictIndent(length: Int) extends Indent
+  case object InBrace extends Indent
+  case object OneLine extends Indent
+
+  val whitespace: Parser[Unit] = (" " | "\n") ^^ const()
 }
 
 trait RabbitTokenParser {
@@ -126,100 +173,214 @@ trait RabbitTypeParser {
     }, id => s"""reserved word "$id" can't be used as identifier""")
 }
 
-class RabbitParser extends RegexParsers with RabbitIndentParser with RabbitTokenParser with RabbitPatternParser with RabbitTypeParser{
+class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenParser with RabbitPatternParser with RabbitTypeParser{
   override val skipWhitespace = false
-  val reserved = List("true", "false", "var", "if", "else", "while", "until", "for", "in", "function")
+  val reserved = List("true", "false", "var", "if", "else", "then", "while", "until", "do", "for", "in", "function")
 
-  def stmt(i: Int): Parser[RabbitTree] = (
+  def stmt(i: Indent): Parser[RabbitTree] = (
       varDef(i)
     | condStmt(i)
     | loopStmt(i)
     | expr(i)
   )
-  def expr(i: Int): Parser[RabbitTree] = expr1(i)
+  def expr(i: Indent): Parser[RabbitTree] = expr1(i)
 
-  def expr1(i: Int): Parser[RabbitTree] = (
-    expr2(i) ~ rep(
-      (indent.**|*(0) ~> ("==" | "!=" | "<" | "<=" | ">" | ">=") <~ indent.**|+(0)) ~ expr2(i)
-    ) ^^ {
-      case x ~ list => (x /: list) {(l, y) =>
-        y match {
-          case op ~ r => BinaryOpTree(op, l, r)
-        }
+  def exprBinL(ops: List[Parser[String]], next: Indent => Parser[RabbitTree])(i: Indent): Parser[RabbitTree] = (
+    i match {
+      case StrictIndent(i) =>
+        next(StrictIndent(i)) ~ rep(
+          with_sindps(i + 1){ oj =>
+            val j = oj getOrElse i
+            (ops reduceLeft (_ | _)) ~ with_sinds_ss(j + 1){ od =>
+              val d = od getOrElse j
+              next(StrictIndent(d))
+            }
+          }
+        )
+      case InBrace =>
+        next(InBrace) ~ rep(
+          (whitespace.* ~> (ops reduceLeft (_ | _)) <~ whitespace.+) ~ next(InBrace)
+        )
+      case OneLine =>
+        next(OneLine) ~ rep(
+          (rep(" ") ~> (ops reduceLeft (_ | _)) <~ rep(" ")) ~ next(OneLine)
+        )
+    }
+  ) ^^ {
+    case x ~ list => (x /: list) {(l, y) =>
+      y match {
+        case op ~ r => BinaryOpTree(op, l, r)
       }
     }
-  )
+  }
 
-  def expr2(i: Int): Parser[RabbitTree] = (
-    expr3(i) ~ rep(
-      (indent.**|*(0) ~> ("+" | "-") <~ indent.**|+(0)) ~ expr3(i)
-    ) ^^ {
-      case x ~ list => (x /: list) {(l, y) =>
-        y match {
-          case op ~ r => BinaryOpTree(op, l, r)
-        }
-      }
-    }
-  )
+  def expr1 = exprBinL(List("==", "!=", "<", "<=", ">", ">="), expr2) _
 
-  def expr3(i: Int): Parser[RabbitTree] = (
-    expr4(i) ~ rep(
-      (indent.**|*(0) ~> ("*" | "//" | "/" | "%%" | "%") <~ indent.**|+(0)) ~ expr4(i)
-    ) ^^ {
-      case x ~ list => (x /: list) {(l, y) =>
-        y match {
-          case op ~ r => BinaryOpTree(op, l, r)
-        }
-      }
-    }
-  )
+  def expr2 = exprBinL(List("+", "-"), expr3) _
 
-  def expr4(i: Int): Parser[RabbitTree] = (
-      term(i) ~ (indent.**|*(0) ~> "**" <~ indent.**|+(0)) ~ expr4(i) ^^ {
+  def expr3 = exprBinL(List("*", "//", "/", "%%", "%"), expr4) _
+
+  def expr4(i: Indent): Parser[RabbitTree] = (
+      term(i) ~ (sindps(0) ~> "**" <~ sinds_ss(0)) ~ expr4(i) ^^ {
         case l ~ op ~ r => BinaryOpTree(op, l, r)
       }
     | term(i)
   )
 
-  def term(i: Int): Parser[RabbitTree] = (
+  def term(i: Indent): Parser[RabbitTree] = (
       num
     | ("+" | "-" | "*" | "/" | "%") ~ term(i) ^^ {
         case op ~ v => UnaryOpTree(op, v)
       }
     | string
     | bool
-    | "(" ~> indent.**|*(0) ~> stmt(0) <~ indent.**|*(0) <~ ")"
+    | "(" ~ whitespace.* ~> stmt(InBrace) <~ whitespace.* ~ ")"
     | identifier ^^ VarRefNode
     | failure("no term found")
   )
 
-  def varDef(i: Int): Parser[VarDefTree] =
-    pattern ~ (rep(" ") ~ ":=" ~ indent.**|*(0)) ~ expr(i) ^^ {
-      case p ~ _ ~ v => VarDefTree(p, v)
+  def varDef(i: Indent): Parser[VarDefTree] = (
+    i match {
+      case StrictIndent(i) =>
+        pattern ~ with_sindps(i + 1){ oj =>
+          val j = oj getOrElse i
+          ":=" ~ sindps(j + 1)
+        } ~ expr(StrictIndent(i))
+      case InBrace =>
+        pattern ~ (whitespace.* ~ ":=" ~ whitespace.*) ~ expr(InBrace)
+      case OneLine =>
+        pattern ~ (rep(" ") ~ ":=" ~ rep(" ")) ~ expr(OneLine)
     }
+  ) ^^ {
+    case p ~ _ ~ v => VarDefTree(p, v)
+  }
 
-  def condStmt(i: Int): Parser[CondTree] = (
-      ("if" | "unless") ~ (rep1(" ") ~> expr(i) <~ (indent.*(i + 2) | rep1(" ") ~ "then" ~ rep1(" "))) ~ block(i + 2)
-    ~ (indent(i) ~ "else" ~ indent(i + 2) ~> block(i + 2) | indent(i) ~ "else" ~ rep1(" ") ~> condStmt(i)).? ^^ {
-        case "if" ~ i ~ t ~ e => IfTree(i, t, e)
-        case "unless" ~ i ~ t ~ e => UnlessTree(i, t, e)
-      }
-  )
+  def condStmt(i: Indent): Parser[CondTree] = (
+    i match {
+      case StrictIndent(i) =>
+        ("if" | "unless") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(i + 1){
+          case Some(j) => block(StrictIndent(j))
+          case None => "then" ~> with_sinds_ss(i + 1){
+            case Some(j) => block(StrictIndent(j))
+            case None => stmt(OneLine)
+          }
+        } ~ with_sind(i){ _ =>
+          "else" ~> with_sinds_ss(i + 1){
+            case Some(j) => block(StrictIndent(j))
+            case None => stmt(OneLine)
+          }
+        }.?
+      case InBrace =>
+        ("if" | "unless") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(1){
+          case Some(i) => block(StrictIndent(i))
+          case None => "then" ~> with_sinds_ss(1){
+            case Some(i) => block(StrictIndent(i))
+            case None => stmt(OneLine)
+          }
+        } ~ with_sinds(0){ _ =>
+          "else" ~> with_sinds_ss(1){
+            case Some(i) => block(StrictIndent(i))
+            case None => stmt(OneLine)
+          }
+        }.?
+      case OneLine => (
+        ("if" | "unless") ~ (rep1(" ") ~> expr(OneLine))
+        ~ (rep1(" ") ~ "then" ~ rep1(" ") ~> stmt(OneLine))
+        ~ (rep1(" ") ~ "else" ~ rep1(" ") ~> stmt(OneLine)).?
+      )
+    }
+  ) ^^ {
+    case "if"     ~ i ~ t ~ e => IfTree(i, t, e)
+    case "unless" ~ u ~ t ~ e => UnlessTree(u, t, e)
+  }
 
-  def loopStmt(i: Int): Parser[LoopTree] = (
-      ("while" | "until") ~ (rep1(" ") ~> expr(i) <~ (indent.*(i + 2) | rep1(" ") ~ "do" ~ rep1(" "))) ~ block(i + 2)
-    ~ (indent(i) ~ "else" ~ indent(i + 2) ~> block(i + 2) | indent(i) ~ "else" ~ rep1(" ") ~> condStmt(i)).? ^^ {
-        case "while" ~ i ~ t ~ e => WhileTree(i, t, e)
-        case "until" ~ i ~ t ~ e => UntilTree(i, t, e)
-      }
-    | ("for" ~> rep1(" ") ~> pattern <~ rep1(" "))
-    ~ ("in" ~> rep1(" ") ~> expr(i) <~ (indent.*(i + 2) | rep1(" ") ~ "do" ~ rep1(" "))) ~ block(i + 2) ^^ {
-        case v ~ e ~ b => ForTree(v, e, b)
-      }
-  )
+  def loopStmt(i: Indent): Parser[LoopTree] = whileStmt(i) | forStmt(i)
 
-  def block(i: Int): Parser[BlockTree] =
-    repsep(stmt(i).?, indent.*(i)) ^^ (xs => BlockTree(xs collect {case Some(x) => x}))
+  def whileStmt(i: Indent): Parser[LoopTree] = (
+    i match {
+      case StrictIndent(i) =>
+        ("while" | "until") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(i + 1){
+          case Some(j) => block(StrictIndent(j))
+          case None => "do" ~> with_sinds_ss(i + 1){
+            case Some(j) => block(StrictIndent(j))
+            case None => stmt(OneLine)
+          }
+        } ~ with_sind(i){ _ =>
+          "else" ~> with_sinds_ss(i + 1){
+            case Some(j) => block(StrictIndent(j))
+            case None => stmt(OneLine)
+          }
+        }.?
+      case InBrace =>
+        ("while" | "until") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(1){
+          case Some(i) => block(StrictIndent(i))
+          case None => "do" ~> with_sinds_ss(1){
+            case Some(i) => block(StrictIndent(i))
+            case None => stmt(OneLine)
+          }
+        } ~ with_sinds(0){ _ =>
+          "else" ~> with_sinds_ss(1){
+            case Some(i) => block(StrictIndent(i))
+            case None => stmt(OneLine)
+          }
+        }.?
+      case OneLine => (
+        ("while" | "until") ~ (rep1(" ") ~> expr(OneLine))
+        ~ (rep1(" ") ~ "do" ~ rep1(" ") ~> stmt(OneLine))
+        ~ (rep1(" ") ~ "else" ~ rep1(" ") ~> stmt(OneLine)).?
+      )
+    }
+  ) ^^ {
+    case "while" ~ w ~ d ~ e => WhileTree(w, d, e)
+    case "until" ~ u ~ d ~ e => UntilTree(u, d, e)
+  }
 
-  def parse(s: String) = parseAll(block(0), s)
+  def forStmt(i: Indent): Parser[LoopTree] = (
+    i match {
+      case StrictIndent(i) =>
+        "for" ~> rep1(" ") ~> pattern ~ (rep1(" ") ~ "in" ~ rep(" ") ~> expr(OneLine)) ~ with_sindps(i + 1){
+          case Some(j) => block(StrictIndent(j))
+          case None => "do" ~> with_sinds_ss(i + 1){
+            case Some(j) => block(StrictIndent(j))
+            case None => stmt(OneLine)
+          }
+        } ~ with_sind(i){ _ =>
+          "else" ~> with_sinds_ss(i + 1){
+            case Some(j) => block(StrictIndent(j))
+            case None => stmt(OneLine)
+          }
+        }.?
+      case InBrace =>
+        "for" ~> rep1(" ") ~> pattern ~ (rep1(" ") ~ "in" ~ rep(" ") ~> expr(OneLine)) ~ with_sindps(1){
+          case Some(i) => block(StrictIndent(i))
+          case None => "do" ~> with_sinds_ss(1){
+            case Some(i) => block(StrictIndent(i))
+            case None => stmt(OneLine)
+          }
+        } ~ with_sinds(0){ _ =>
+          "else" ~> with_sinds_ss(1){
+            case Some(i) => block(StrictIndent(i))
+            case None => stmt(OneLine)
+          }
+        }.?
+      case OneLine => (
+        "for" ~> (rep1(" ") ~> pattern)
+        ~ (rep1(" ") ~ "in" ~ rep1(" ") ~> stmt(OneLine))
+        ~ (rep1(" ") ~ "do" ~ rep1(" ") ~> stmt(OneLine))
+        ~ (rep1(" ") ~ "else" ~ rep1(" ") ~> stmt(OneLine)).?
+      )
+    }
+  ) ^^ {
+    case f ~ i ~ d ~ _ => ForTree(f, i, d)
+  }
+
+  def block(i: Indent): Parser[BlockTree] = (
+    i match {
+      case StrictIndent(i) => stmt(StrictIndent(i)).? ~ rep(with_sind(i)(i => stmt(StrictIndent(i)).?))
+      case InBrace => stmt(InBrace).? ~ rep(sindps(0) ~ ";" ~ sindps(0) ~> stmt(InBrace).?)
+      case OneLine => stmt(InBrace).? ~ rep(rep(" ") ~ ";" ~ rep(" ") ~> stmt(InBrace).?)
+    }
+  ) ^^ {case x ~ xs => BlockTree((x :: xs) collect {case Some(x) => x})}
+
+  def parse(s: String) = parseAll(block(StrictIndent(0)), s)
 }

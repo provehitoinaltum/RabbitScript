@@ -22,14 +22,8 @@ object Lib {
   implicit class AString(self: String) {
     def eachLine(f: String => Unit) = self.lines foreach f
     def mapLines(f: String => String) = self.lines map f mkString "\n"
-    def replaceWithList(l: List[(String, String)]) = {
-      def replaceWithList2(s: String, l: List[(String, String)]): String =
-        l match {
-          case (b, a) :: ls => replaceWithList2(s.replace(b, a), ls)
-          case Nil => s
-        }
-        replaceWithList2(self, l)
-    }
+    def replaceWithTuples(a: (String, String)*) = replaceWithList(a.toList)
+    def replaceWithList(l: List[(String, String)]): String = (self /: l) {(s, t) => s.replace(t._1, t._2)}
     def replaceWithMap(m: Map[String, String]) = replaceWithList(m.toList)
   }
 }
