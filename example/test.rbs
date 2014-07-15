@@ -1,17 +1,2 @@
-if cond == 0
-  (a, b: Int): Tuple := "\n\\\n\"\n" +
-    10
-  5
-else
-  "NG"
-  for x: Int in 10
-    test
-    while 10 + 1 do hoge
-    10 +
-      516
-       * 2
-    if (if cond then (i + 1)
-     else 'no') then 10
-    else 2
-  1 + 4
-
+a: Int := 10
+a = 10

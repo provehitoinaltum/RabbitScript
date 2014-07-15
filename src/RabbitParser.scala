@@ -183,49 +183,69 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
     | loopStmt(i)
     | expr(i)
   )
-  def expr(i: Indent): Parser[RabbitTree] = expr1(i)
 
-  def exprBinL(ops: List[Parser[String]], next: Indent => Parser[RabbitTree])(i: Indent): Parser[RabbitTree] = (
+  def varref(i: Indent): Parser[VarRefNode] = identifier ^^ VarRefNode
+
+  def expr(i: Indent): Parser[RabbitTree] = assign(i) | expr1(i)
+  def assign = exprBinR(List("="), varref, expr1)({ (_, n, v) => AssignTree(n, v) }) _
+
+  def exprBinL[T, U](ops: List[Parser[String]], l: Indent => Parser[T], r: Indent => Parser[U])
+                    (f: (String, T, U) => T)(i: Indent): Parser[T] = (
     i match {
       case StrictIndent(i) =>
-        next(StrictIndent(i)) ~ rep(
+        l(StrictIndent(i)) ~ rep(
           with_sindps(i + 1){ oj =>
             val j = oj getOrElse i
             (ops reduceLeft (_ | _)) ~ with_sinds_ss(j + 1){ od =>
               val d = od getOrElse j
-              next(StrictIndent(d))
+              r(StrictIndent(d))
             }
           }
         )
       case InBrace =>
-        next(InBrace) ~ rep(
-          (whitespace.* ~> (ops reduceLeft (_ | _)) <~ whitespace.+) ~ next(InBrace)
+        l(InBrace) ~ rep(
+          (whitespace.* ~> (ops reduceLeft (_ | _)) <~ whitespace.+) ~ r(InBrace)
         )
       case OneLine =>
-        next(OneLine) ~ rep(
-          (rep(" ") ~> (ops reduceLeft (_ | _)) <~ rep(" ")) ~ next(OneLine)
+        l(OneLine) ~ rep(
+          (rep(" ") ~> (ops reduceLeft (_ | _)) <~ rep1(" ")) ~ r(OneLine)
         )
     }
   ) ^^ {
     case x ~ list => (x /: list) {(l, y) =>
       y match {
-        case op ~ r => BinaryOpTree(op, l, r)
+        case op ~ r => f(op, l, r)
       }
     }
   }
 
-  def expr1 = exprBinL(List("==", "!=", "<", "<=", ">", ">="), expr2) _
+  def exprBinR[T, U](ops: List[Parser[String]], l: Indent => Parser[T], r: Indent => Parser[U])
+                    (f: (String, T, U) => U)(i: Indent): Parser[U] = (
+    i match {
+      case StrictIndent(i) =>
+        l(StrictIndent(i)) ~ with_sindps(i + 1){ oj =>
+          val j = oj getOrElse i
+          (ops reduceLeft (_ | _)) ~ with_sinds_ss(j + 1){ od =>
+            val d = od getOrElse j
+            exprBinR(ops, l, r)(f)(StrictIndent(d))
+          }
+        }
+      case InBrace =>
+        l(InBrace) ~ ((whitespace.* ~> (ops reduceLeft (_ | _)) <~ whitespace.*) ~ exprBinR(ops, l, r)(f)(InBrace))
+      case OneLine =>
+        l(OneLine) ~ ((rep(" ") ~> (ops reduceLeft (_ | _)) <~ rep(" ")) ~ exprBinR(ops, l, r)(f)(OneLine))
+    }
+  ) ^^ {
+    case l ~ (op ~ r) => f(op, l, r)
+  } | r(i)
 
-  def expr2 = exprBinL(List("+", "-"), expr3) _
+  def expr1 = exprBinL(List("==", "!=", "<", "<=", ">", ">="), expr2, expr2)(BinaryOpTree) _
 
-  def expr3 = exprBinL(List("*", "//", "/", "%%", "%"), expr4) _
+  def expr2 = exprBinL(List("+", "-"), expr3, expr3)(BinaryOpTree) _
 
-  def expr4(i: Indent): Parser[RabbitTree] = (
-      term(i) ~ (sindps(0) ~> "**" <~ sinds_ss(0)) ~ expr4(i) ^^ {
-        case l ~ op ~ r => BinaryOpTree(op, l, r)
-      }
-    | term(i)
-  )
+  def expr3 = exprBinL(List("*", "//", "/", "%%", "%"), expr4, expr4)(BinaryOpTree) _
+
+  def expr4 = exprBinR(List("**"), term, term)(BinaryOpTree) _
 
   def term(i: Indent): Parser[RabbitTree] = (
       num
@@ -235,7 +255,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
     | string
     | bool
     | "(" ~ whitespace.* ~> stmt(InBrace) <~ whitespace.* ~ ")"
-    | identifier ^^ VarRefNode
+    | varref(i)
     | failure("no term found")
   )
 

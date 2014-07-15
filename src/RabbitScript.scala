@@ -5,10 +5,10 @@ import collection._
 
 object RabbitScript {
   def main(args: Array[String]) {
-    val cla = new CommandLineArgument[Unit]()
+    val cla = new CommandLineArgument[Unit]
     cla("v") = CommandLineOption (
       arity = 0,
-      f = { _ => println("RabbitScript ver. α32\n") }
+      f = { _ => println("RabbitScript ver. α33\n") }
     )
     cla("h") = CommandLineOption (
       arity = 0,
@@ -40,7 +40,7 @@ object RabbitScript {
 
 case class CommandLineOption(arity: Int, f: List[String] => Unit)
 
-class CommandLineArgument[T]() {
+class CommandLineArgument[T] {
   private val options = mutable.Map[String, CommandLineOption]()
   private var _main: List[String] => T = _
   def update(opt :String, clo: CommandLineOption) {

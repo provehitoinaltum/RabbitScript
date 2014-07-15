@@ -70,9 +70,12 @@ case class BinaryOpTree(op: String, l: RabbitTree, r: RabbitTree) extends Rabbit
     )
   }
 }
+case class AssignTree(name: VarRefNode, value: RabbitTree) extends RabbitTree {
+  def debugJavaScript = name.debugJavaScript + " = " + value.debugJavaScript
+}
 case class VarDefTree(pattern: PatternTree, value: RabbitTree) extends RabbitTree {
   def debugJavaScript =
-    s"var " + pattern.debugJavaScript + ";\n" + pattern.debugJavaScript + " = " + value.debugJavaScript
+    s"var " + pattern.debugJavaScript + " = " + value.debugJavaScript
 }
 abstract class CondTree extends RabbitTree
 case class IfTree(cond: RabbitTree, _if: RabbitTree, _else: Option[RabbitTree]) extends CondTree {
