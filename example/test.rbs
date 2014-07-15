@@ -6,12 +6,12 @@ else
   "NG"
   for x: Int in 10
     test
-    while 10 + 1
-      10 +
-        516
-         * 2
-      if (if cond then (i + 1)
-       else 'no') then 10
-      else 2
+    while 10 + 1 do hoge
+    10 +
+      516
+       * 2
+    if (if cond then (i + 1)
+     else 'no') then 10
+    else 2
   1 + 4
 

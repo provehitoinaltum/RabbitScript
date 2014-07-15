@@ -31,7 +31,7 @@ trait RabbitSpaceParser {
   def with_ind     [T](i: Int)(f: Int => Parser[T]) = ind(i) ~> f(i)
   def with_sind    [T](i: Int)(f: Int => Parser[T]) = sind(i) ~> f(i)
   def with_sinds   [T](i: Int)(f: Int => Parser[T]) = {
-    var x = 0;
+    var x = 0
     sind(i) ~ (rep(" ") ^^ {s => x = s.length}) ~> f(i + x)
   }
   def with_indp    [T](i: Int)(f: Option[Int] => Parser[T]) = ind(i) ~> f(Some(i)) | f(None)
