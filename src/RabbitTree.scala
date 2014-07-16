@@ -16,12 +16,12 @@ case class StringNode(quote: String)(value: String) extends RabbitLeaf {
   private lazy val s = {
     val s =
       value.replaceWithTuples(
-        "\\" -> "\\\\",
-        "\t" -> "\\t",
-        "\n" -> "\\n",
-        "\r" -> "\\r",
-        "\0" -> "\\0",
-        quote -> s"\\$quote"
+        "\\" → "\\\\",
+        "\t" → "\\t",
+        "\n" → "\\n",
+        "\r" → "\\r",
+        "\0" → "\\0",
+        quote → s"\\$quote"
       )
     quote + (
       "[\u0000-\u001f]".r replaceAllIn (s, m ⇒ "\\\\u%04x" format m.toString()(0).toInt)
