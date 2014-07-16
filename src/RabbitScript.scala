@@ -8,13 +8,13 @@ object RabbitScript {
     val cla = new CommandLineArgument[Unit]
     cla("v") = CommandLineOption (
       arity = 0,
-      f = { _ ⇒ println("RabbitScript ver. α33\n") }
+      f = { Nil ⇒ println("RabbitScript ver. α33\n") }
     )
     cla("h") = CommandLineOption (
       arity = 0,
-      f = { _ ⇒
+      f = { Nil ⇒
         println("""Is the order help?
-                  |Usage: rsc <options> [<filename>]
+                  |Usage: rabbit <options> [<filename>]
                   |
                   |<options>:
                   |  -v      show version number
@@ -23,9 +23,9 @@ object RabbitScript {
       }
     )
     cla.main = ( args ⇒
-      using(io.Source fromFile args(0)) {
+      (io.Source fromFile args(0)) →→ { sc ⇒
         val rp = new RabbitParser
-        rp parse _.getLines.mkString("\n") match {
+        rp parse sc.getLines.mkString("\n") match {
           case rp.Success(tree, _) ⇒
             println(tree)
             tree.debugJavaScript eachLine (l ⇒ println(l drop 2))
