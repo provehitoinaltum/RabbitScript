@@ -8,11 +8,11 @@ object RabbitScript {
     val cla = new CommandLineArgument[Unit]
     cla("v") = CommandLineOption (
       arity = 0,
-      f = { _ => println("RabbitScript ver. α33\n") }
+      f = { _ ⇒ println("RabbitScript ver. α33\n") }
     )
     cla("h") = CommandLineOption (
       arity = 0,
-      f = { _ =>
+      f = { _ ⇒
         println("""Is the order help?
                   |Usage: rsc <options> [<filename>]
                   |
@@ -22,14 +22,14 @@ object RabbitScript {
                   |""".stripMargin)
       }
     )
-    cla.main = ( args =>
+    cla.main = ( args ⇒
       using(io.Source fromFile args(0)) {
         val rp = new RabbitParser
         rp parse _.getLines.mkString("\n") match {
-          case rp.Success(tree, _) =>
+          case rp.Success(tree, _) ⇒
             println(tree)
-            tree.debugJavaScript eachLine (l => println(l drop 2))
-          case x =>
+            tree.debugJavaScript eachLine (l ⇒ println(l drop 2))
+          case x ⇒
             println(x)
         }
       }
@@ -38,32 +38,32 @@ object RabbitScript {
   }
 }
 
-case class CommandLineOption(arity: Int, f: List[String] => Unit)
+case class CommandLineOption(arity: Int, f: List[String] ⇒ Unit)
 
 class CommandLineArgument[T] {
   private val options = mutable.Map[String, CommandLineOption]()
-  private var _main: List[String] => T = _
+  private var _main: List[String] ⇒ T = _
   def update(opt :String, clo: CommandLineOption) {
     options(opt) = clo
   }
   def main{}
-  def main_=(main: List[String] => T) {
+  def main_=(main: List[String] ⇒ T) {
     _main = main
   }
   def parse(args: List[String]): Either[String, Option[T]] = args match {
-    case init :: tail =>
+    case init :: tail ⇒
       if(init(0) == '-')
         options.get(init substring 1) match {
-          case Some(CommandLineOption(arity, f)) =>
+          case Some(CommandLineOption(arity, f)) ⇒
             val (take, drop) = tail splitAt arity
             f(take)
             parse(drop)
-          case None =>
+          case None ⇒
             Left("bad option: " + init)
         }
       else
         Right(Some(_main(args)))
-    case Nil =>
+    case Nil ⇒
       Right(None)
   }
 }
