@@ -35,17 +35,18 @@ object RabbitScript {
     )
     cla("h") = CommandLineOption (
       arity = 0,
-      f = { case Nil ⇒
-        println("""Is the order help?
-                  |Usage: rabbit <options> [<filename>]
-                  |
-                  |<options>:
-                  |  -w [0-3]      set warning level
-                  |  
-                  |  -v            show version number
-                  |  -h            show this help message
-                  |""".stripMargin)
-        Right()
+      f = {
+        case Nil ⇒
+          println("""Is the order help?
+                    |Usage: rabbit <options> [<filename>]
+                    |
+                    |<options>:
+                    |  -w [0-3]      set warning level
+                    |  
+                    |  -v            show version number
+                    |  -h            show this help message
+                    |""".stripMargin)
+          Right()
       }
     )
     cla.main = { args ⇒
@@ -67,7 +68,9 @@ object RabbitScript {
       }
     }
     cla parse args.toList match {
-      case Left(s) ⇒ Console.err.println(s)
+      case Left(s) ⇒
+        Console.err println s
+        Console.err println "try -h for more information."
       case Right(Some(_)) ⇒
       case Right(None) ⇒ println("no file given")
     }
