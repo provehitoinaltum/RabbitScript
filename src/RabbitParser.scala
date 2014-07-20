@@ -36,10 +36,10 @@ trait RabbitSpaceParser {
   }
   def with_indp    [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = ind(i) ~> f(Some(i)) | f(None)
   def with_sindp   [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = sind(i) ~> f(Some(i)) | rep(" ") ~> f(None)
-  def with_sindps  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(some(f)) | rep(" ") ~> f(None)
+  def with_sindps  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f </> Some.apply) | rep(" ") ~> f(None)
   def with_ind_ss  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = ind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
   def with_sind_ss [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = sind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
-  def with_sinds_ss[T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(some(f)) | rep1(" ") ~> f(None)
+  def with_sinds_ss[T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f </> Some.apply) | rep1(" ") ~> f(None)
 
 /*
   implicit class IndentParser[T](p: Parser[T]) {
@@ -181,13 +181,12 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
       varDef(i)
     | condStmt(i)
     | loopStmt(i)
-    | expr(i)
+    | assign(i)
   )
 
   def varref(i: Indent): Parser[VarRefNode] = identifier ^^ VarRefNode
 
-  def expr(i: Indent): Parser[RabbitTree] = assign(i) | expr1(i)
-  def assign = exprBinR(List("="), varref, expr1)({ (_, n, v) ⇒ AssignTree(n, v) }) _
+  def assign = exprBinR(List("="), varref, fncall)({ (_, n, v) ⇒ AssignTree(n, v) }) _
 
   def exprBinL[T, U](ops: List[Parser[String]], l: Indent ⇒ Parser[T], r: Indent ⇒ Parser[U])
                     (f: (String, T, U) ⇒ T)(i: Indent): Parser[T] = (
@@ -239,6 +238,22 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
     case l ~ (op ~ r) ⇒ f(op, l, r)
   } | r(i)
 
+  def fncall(i: Indent): Parser[RabbitTree] = (
+    i match {
+      case StrictIndent(i) ⇒
+        term(StrictIndent(i)) ~ with_sinds_ss(i + 1){ oj =>
+          val j = oj getOrElse i
+          fncall(StrictIndent(j))
+        }
+      case InBrace ⇒
+        term(InBrace) ~ (whitespace.+ ~> term(InBrace))
+      case OneLine ⇒
+        term(OneLine) ~ (rep1(" ") ~> term(OneLine))
+    }
+  ) ^^ {
+    case f ~ x ⇒ FnCallTree(f, x)
+  } | expr1(i)
+
   def expr1 = exprBinL(List("==", "!=", "<", "<=", ">", ">="), expr2, expr2)(BinaryOpTree) _
 
   def expr2 = exprBinL(List("+", "-"), expr3, expr3)(BinaryOpTree) _
@@ -265,11 +280,11 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
         pattern ~ with_sindps(i + 1){ oj ⇒
           val j = oj getOrElse i
           ":=" ~ sindps(j + 1)
-        } ~ expr(StrictIndent(i))
+        } ~ assign(StrictIndent(i))
       case InBrace ⇒
-        pattern ~ (whitespace.* ~ ":=" ~ whitespace.*) ~ expr(InBrace)
+        pattern ~ (whitespace.* ~ ":=" ~ whitespace.*) ~ assign(InBrace)
       case OneLine ⇒
-        pattern ~ (rep(" ") ~ ":=" ~ rep(" ")) ~ expr(OneLine)
+        pattern ~ (rep(" ") ~ ":=" ~ rep(" ")) ~ assign(OneLine)
     }
   ) ^^ {
     case p ~ _ ~ v ⇒ VarDefTree(p, v)
@@ -278,7 +293,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
   def condStmt(i: Indent): Parser[CondTree] = (
     i match {
       case StrictIndent(i) ⇒
-        ("if" | "unless") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(i + 1){
+        ("if" | "unless") ~ (rep1(" ") ~> expr1(OneLine)) ~ with_sindps(i + 1){
           case Some(j) ⇒ block(StrictIndent(j))
           case None ⇒ "then" ~> with_sinds_ss(i + 1){
             case Some(j) ⇒ block(StrictIndent(j))
@@ -291,7 +306,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
           }
         }.?
       case InBrace ⇒
-        ("if" | "unless") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(1){
+        ("if" | "unless") ~ (rep1(" ") ~> expr1(OneLine)) ~ with_sindps(1){
           case Some(i) ⇒ block(StrictIndent(i))
           case None ⇒ "then" ~> with_sinds_ss(1){
             case Some(i) ⇒ block(StrictIndent(i))
@@ -304,7 +319,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
           }
         }.?
       case OneLine ⇒ (
-        ("if" | "unless") ~ (rep1(" ") ~> expr(OneLine))
+        ("if" | "unless") ~ (rep1(" ") ~> expr1(OneLine))
         ~ (rep1(" ") ~ "then" ~ rep1(" ") ~> stmt(OneLine))
         ~ (rep1(" ") ~ "else" ~ rep1(" ") ~> stmt(OneLine)).?
       )
@@ -319,7 +334,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
   def whileStmt(i: Indent): Parser[LoopTree] = (
     i match {
       case StrictIndent(i) ⇒
-        ("while" | "until") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(i + 1){
+        ("while" | "until") ~ (rep1(" ") ~> expr1(OneLine)) ~ with_sindps(i + 1){
           case Some(j) ⇒ block(StrictIndent(j))
           case None ⇒ "do" ~> with_sinds_ss(i + 1){
             case Some(j) ⇒ block(StrictIndent(j))
@@ -332,7 +347,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
           }
         }.?
       case InBrace ⇒
-        ("while" | "until") ~ (rep1(" ") ~> expr(OneLine)) ~ with_sindps(1){
+        ("while" | "until") ~ (rep1(" ") ~> expr1(OneLine)) ~ with_sindps(1){
           case Some(i) ⇒ block(StrictIndent(i))
           case None ⇒ "do" ~> with_sinds_ss(1){
             case Some(i) ⇒ block(StrictIndent(i))
@@ -345,7 +360,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
           }
         }.?
       case OneLine ⇒ (
-        ("while" | "until") ~ (rep1(" ") ~> expr(OneLine))
+        ("while" | "until") ~ (rep1(" ") ~> expr1(OneLine))
         ~ (rep1(" ") ~ "do" ~ rep1(" ") ~> stmt(OneLine))
         ~ (rep1(" ") ~ "else" ~ rep1(" ") ~> stmt(OneLine)).?
       )
@@ -358,7 +373,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
   def forStmt(i: Indent): Parser[LoopTree] = (
     i match {
       case StrictIndent(i) ⇒
-        "for" ~> rep1(" ") ~> pattern ~ (rep1(" ") ~ "in" ~ rep(" ") ~> expr(OneLine)) ~ with_sindps(i + 1){
+        "for" ~> rep1(" ") ~> pattern ~ (rep1(" ") ~ "in" ~ rep(" ") ~> expr1(OneLine)) ~ with_sindps(i + 1){
           case Some(j) ⇒ block(StrictIndent(j))
           case None ⇒ "do" ~> with_sinds_ss(i + 1){
             case Some(j) ⇒ block(StrictIndent(j))
@@ -371,7 +386,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
           }
         }.?
       case InBrace ⇒
-        "for" ~> rep1(" ") ~> pattern ~ (rep1(" ") ~ "in" ~ rep(" ") ~> expr(OneLine)) ~ with_sindps(1){
+        "for" ~> rep1(" ") ~> pattern ~ (rep1(" ") ~ "in" ~ rep(" ") ~> expr1(OneLine)) ~ with_sindps(1){
           case Some(i) ⇒ block(StrictIndent(i))
           case None ⇒ "do" ~> with_sinds_ss(1){
             case Some(i) ⇒ block(StrictIndent(i))

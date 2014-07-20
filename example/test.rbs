@@ -1,7 +1,6 @@
-a: Int := 10   
-if a > 5 then  
-  
-  
+b: Int := 0
+a: Int := b = 10   
+if b == 5 then  
   a = 20
-  
-else a = 30
+  f (a = 5)
+else (f 30) + 10

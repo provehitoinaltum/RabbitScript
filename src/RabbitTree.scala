@@ -27,7 +27,7 @@ case class StringNode(quote: String)(value: String) extends RabbitLeaf {
       "[\u0000-\u001f]".r replaceAllIn (s, m ⇒ "\\\\u%04x" format m.toString()(0).toInt)
     ) + quote
   }
-  override def toString = "String(" + s + ")"
+  override def toString = s"String($s)"
 }
 case class BooleanNode(value: Boolean) extends RabbitLeaf {
   def debugJavaScript = if(value) "true" else "false"
@@ -80,18 +80,18 @@ case class VarDefTree(pattern: PatternTree, value: RabbitTree) extends RabbitTre
 abstract class CondTree extends RabbitTree
 case class IfTree(cond: RabbitTree, _if: RabbitTree, _else: Option[RabbitTree]) extends CondTree {
   def debugJavaScript =
-    "if(" + cond.debugJavaScript + "){\n" + _if.debugJavaScript + "\n}" + (
+    s"if(${cond.debugJavaScript}){\n${_if.debugJavaScript}\n}" + (
       _else match {
-        case Some(e) ⇒ "else{\n" + e.debugJavaScript + "\n}"
+        case Some(e) ⇒ s"else{\n${e.debugJavaScript}\n}"
         case None ⇒ ""
       }
     )
 }
-case class UnlessTree(cond: RabbitTree, unless: RabbitTree, _else: Option[RabbitTree]) extends CondTree {
+case class UnlessTree(cond: RabbitTree, _unless: RabbitTree, _else: Option[RabbitTree]) extends CondTree {
   def debugJavaScript =
-    "if(!(" + cond.debugJavaScript + ")){\n" + unless.debugJavaScript + "\n}" + (
+    s"if(!(${cond.debugJavaScript}\n${_unless.debugJavaScript}\n}" + (
       _else match {
-        case Some(e) ⇒ "else{\n" + e.debugJavaScript + "\n}"
+        case Some(e) ⇒ s"else{\n${e.debugJavaScript}\n}"
         case None ⇒ ""
       }
     )
@@ -100,35 +100,35 @@ abstract class LoopTree extends RabbitTree
 case class WhileTree(cond: RabbitTree, _while: RabbitTree, _else: Option[RabbitTree]) extends LoopTree {
   def debugJavaScript =
     _else match {
-      case Some(e) ⇒ (
-          "var __break=false;\nwhile(" + cond.debugJavaScript + "){\n" + _while.debugJavaScript + "\n}\n"
-        + "if(__break){\n" + e.debugJavaScript + "\n}"
-        )
+      case Some(e) ⇒
+        s"var __break=false;\nwhile(${cond.debugJavaScript}){\n${_while.debugJavaScript}\n}" +
+        s"if(!__break){\n${e.debugJavaScript}\n}"
       case None ⇒
-        "while(" + cond.debugJavaScript + "){\n" + _while.debugJavaScript + "\n}"
+        s"while(${cond.debugJavaScript}){\n${_while.debugJavaScript}\n}"
     }
 }
-case class UntilTree(cond: RabbitTree, until: RabbitTree, _else: Option[RabbitTree]) extends LoopTree {
+case class UntilTree(cond: RabbitTree, _until: RabbitTree, _else: Option[RabbitTree]) extends LoopTree {
   def debugJavaScript =
     _else match {
-      case Some(e) ⇒ (
-          "var __break=false;\n"
-        + "while(!(" + cond.debugJavaScript + "))" + "{\n" + until.debugJavaScript + "\n}\n"
-        + "if(!__break){\n" + e.debugJavaScript + "\n}"
-        )
+      case Some(e) ⇒
+        s"var __break=false;\nwhile(!(${cond.debugJavaScript})){\n${_until.debugJavaScript}\n}" +
+        s"if(!__break){\n${e.debugJavaScript}\n}"
       case None ⇒
-        "while(!(" + cond.debugJavaScript + "))" + "{\n" + until.debugJavaScript + "\n}"
+        s"while(!(${cond.debugJavaScript})){\n${_until.debugJavaScript}\n}"
     }
 }
 case class ForTree(pattern: PatternTree, expr: RabbitTree, block: RabbitTree) extends LoopTree {
   def debugJavaScript =
-    "for(" + pattern.debugJavaScript + " in " + (
+    s"for(${pattern.debugJavaScript} in " + (
       expr match {
         case _: RabbitLeaf ⇒ expr.debugJavaScript
         case _ ⇒ "(" + expr.debugJavaScript + ")"
       }
-    ) + "){\n" + block.debugJavaScript + "\n}"
+    ) + s"){\n${block.debugJavaScript}\n}"
 }
 case class BlockTree(stmts: List[RabbitTree]) extends RabbitTree {
   def debugJavaScript = ((stmts map (x ⇒ x.debugJavaScript) mkString ";\n") mapLines ("  " + _)) + ";"
+}
+case class FnCallTree(f: RabbitTree, x: RabbitTree) extends RabbitTree {
+  def debugJavaScript = s"${f.debugJavaScript}(${x.debugJavaScript})"
 }

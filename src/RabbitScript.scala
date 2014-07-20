@@ -14,7 +14,7 @@ object RabbitScript {
           try {
             val warning = w.toInt
             if(0 <= warning) {
-              if(warning <= 3){
+              if(warning <= 3) {
                 warningLevel = warning
                 Right()
               } else {
@@ -31,7 +31,7 @@ object RabbitScript {
     )
     cla("v") = CommandLineOption (
       arity = 0,
-      f = { case Nil ⇒ println("RabbitScript ver. α33\n"); Right() }
+      f = { case Nil ⇒ println("RabbitScript ver. α38\n"); Right() }
     )
     cla("h") = CommandLineOption (
       arity = 0,
