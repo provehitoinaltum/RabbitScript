@@ -4,6 +4,7 @@ import net.akouryy.common.Lib._
 import collection._
 
 object RabbitScript {
+  val Version = "α39"
   def main(args: Array[String]) {
     val cla = new CommandLineArgument[Unit]
     var warningLevel = 1
@@ -16,7 +17,7 @@ object RabbitScript {
             if(0 <= warning) {
               if(warning <= 3) {
                 warningLevel = warning
-                Right()
+                Right(())
               } else {
                 Left("warning level must be <= 3")
               }
@@ -31,7 +32,7 @@ object RabbitScript {
     )
     cla("v") = CommandLineOption (
       arity = 0,
-      f = { case Nil ⇒ println("RabbitScript ver. α38\n"); Right() }
+      f = { case Nil ⇒ println(s"RabbitScript ver. $Version\n"); Right(()) }
     )
     cla("h") = CommandLineOption (
       arity = 0,
@@ -46,7 +47,7 @@ object RabbitScript {
                     |  -v            show version number
                     |  -h            show this help message
                     |""".stripMargin)
-          Right()
+          Right(())
       }
     )
     cla.main = { args ⇒
@@ -61,7 +62,7 @@ object RabbitScript {
               println(x)
           }
         }
-        Right()
+        Right(())
       } catch {
         case _: java.io.FileNotFoundException ⇒
           Left(s"file ${args(0)} not found")

@@ -9,23 +9,23 @@ trait RabbitSpaceParser {
   self: RabbitParser ⇒
 
   /** indent */
-  def  ind    (i: Int) = "\n" ~ (" " * i) ^^ const()
+  def  ind    (i: Int) = "\n" ~ (" " * i) ^^ const(())
   /** space* indent */
-  def sind    (i: Int) = rep(" ") ~ ind(i) ^^ const()
+  def sind    (i: Int) = rep(" ") ~ ind(i) ^^ const(())
   /** space* indent space* */
-  def sinds   (i: Int) = sind(i) ~ rep(" ") ^^ const()
+  def sinds   (i: Int) = sind(i) ~ rep(" ") ^^ const(())
   /** indent? */
-  def  indp   (i: Int) = ind(i).? ^^ const()
+  def  indp   (i: Int) = ind(i).? ^^ const(())
   /** space* indent? */
-  def sindp   (i: Int) = rep(" ") ~ indp(i) ^^ const()
+  def sindp   (i: Int) = rep(" ") ~ indp(i) ^^ const(())
   /** space* indent? space* */
-  def sindps  (i: Int) = rep(" ") ~ (ind(i) ~ rep(" ")).? ^^ const()
+  def sindps  (i: Int) = rep(" ") ~ (ind(i) ~ rep(" ")).? ^^ const(())
   /** indent | space+ */
-  def  ind_ss (i: Int) = ind(i) | rep1(" ") ^^ const()
+  def  ind_ss (i: Int) = ind(i) | rep1(" ") ^^ const(())
   /** space* indent | space+ */
-  def sind_ss (i: Int) = sind(i) | rep1(" ") ^^ const()
+  def sind_ss (i: Int) = sind(i) | rep1(" ") ^^ const(())
   /** space* indent space* | space+ */
-  def sinds_ss(i: Int) = sinds(i) | rep1(" ") ^^ const()
+  def sinds_ss(i: Int) = sinds(i) | rep1(" ") ^^ const(())
 
   private def some[T, U](f: Option[T] ⇒ U) = (x: T) ⇒ f(Some(x))
   def with_ind     [T](i: Int)(f: Int ⇒ Parser[T]) = ind(i) ~> f(i)
@@ -63,7 +63,7 @@ trait RabbitSpaceParser {
   case object InBrace extends Indent
   case object OneLine extends Indent
 
-  val whitespace: Parser[Unit] = (" " | "\n") ^^ const()
+  val whitespace: Parser[Unit] = (" " | "\n") ^^ const(())
 }
 
 trait RabbitTokenParser {
@@ -105,7 +105,7 @@ trait RabbitTokenParser {
                   case "t"  ⇒ "\t"
                   case "n"  ⇒ "\n"
                   case "r"  ⇒ "\r"
-                  case "0"  ⇒ "\0"
+                  case "0"  ⇒ "\u0000"
               }
             | """u[0-9a-f]{4}""".r ^^ {
                 case s ⇒ 

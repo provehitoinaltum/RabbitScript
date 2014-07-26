@@ -20,7 +20,7 @@ case class StringNode(quote: String)(value: String) extends RabbitLeaf {
         "\t" → "\\t",
         "\n" → "\\n",
         "\r" → "\\r",
-        "\0" → "\\0",
+        "\u0000" → "\\0",
         quote → s"\\$quote"
       )
     quote + (
