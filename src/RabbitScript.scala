@@ -4,7 +4,7 @@ import net.akouryy.common.Lib._
 import collection._
 
 object RabbitScript {
-  val Version = "α41"
+  val Version = "α42"
   def main(args: Array[String]) {
     val clp = new CommandLineParser[Unit]
     var warningLevel = 1

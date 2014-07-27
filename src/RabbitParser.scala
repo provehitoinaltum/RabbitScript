@@ -36,10 +36,10 @@ trait RabbitSpaceParser {
   }
   def with_indp    [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = ind(i) ~> f(Some(i)) | f(None)
   def with_sindp   [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = sind(i) ~> f(Some(i)) | rep(" ") ~> f(None)
-  def with_sindps  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f </> Some.apply) | rep(" ") ~> f(None)
+  def with_sindps  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f compose Some.apply) | rep(" ") ~> f(None)
   def with_ind_ss  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = ind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
   def with_sind_ss [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = sind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
-  def with_sinds_ss[T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f </> Some.apply) | rep1(" ") ~> f(None)
+  def with_sinds_ss[T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f compose Some.apply) | rep1(" ") ~> f(None)
 
 /*
   implicit class IndentParser[T](p: Parser[T]) {

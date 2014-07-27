@@ -1,11 +1,6 @@
 package net.akouryy.common
 
 object Lib {
-  implicit class AFunc1[A, B](self: A ⇒ B) {
-    def <*>[C](f: B ⇒ C) = { a: A ⇒ f(self(a)) }
-    def </>[C](f: C ⇒ A) = { c: C ⇒ self(f(c)) }
-    def <#>(a: A) = self(a)
-  }
   implicit class ASource[S <: io.Source](self: S) {
     def ->->[A](f: S ⇒ A) {
       try {
