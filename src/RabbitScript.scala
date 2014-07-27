@@ -4,11 +4,11 @@ import net.akouryy.common.Lib._
 import collection._
 
 object RabbitScript {
-  val Version = "α39"
+  val Version = "α41"
   def main(args: Array[String]) {
-    val cla = new CommandLineArgument[Unit]
+    val clp = new CommandLineParser[Unit]
     var warningLevel = 1
-    cla(false, 'w', "warning") = CommandLineOption (
+    clp(false, 'w', "warning") = CommandLineOption (
       arity = 1,
       f = {
         case w :: Nil ⇒
@@ -30,11 +30,11 @@ object RabbitScript {
           }
       }
     )
-    cla(true, 'v', "version") = CommandLineOption (
+    clp(true, 'v', "version") = CommandLineOption (
       arity = 0,
       f = { case Nil ⇒ println(s"RabbitScript ver. $Version\n"); Right(()) }
     )
-    cla(true, 'h', "help") = CommandLineOption (
+    clp(true, 'h', "help") = CommandLineOption (
       arity = 0,
       f = {
         case Nil ⇒
@@ -52,7 +52,7 @@ object RabbitScript {
           Right(())
       }
     )
-    cla.main = { args ⇒
+    clp.main = { args ⇒
       try {
         (io.Source fromFile args(0)) →→ { sc ⇒
           val rp = new RabbitParser
@@ -70,7 +70,7 @@ object RabbitScript {
           Left(s"file ${args(0)} not found")
       }
     }
-    cla parse args.toList match {
+    clp parse args.toList match {
       case Left(s) ⇒
         Console.err println s
         Console.err println "try -h for more information"
@@ -81,7 +81,7 @@ object RabbitScript {
 
 case class CommandLineOption(arity: Int, f: PartialFunction[List[String], Either[String, Unit]])
 
-class CommandLineArgument[A] {
+class CommandLineParser[A] {
   private val options = mutable.Map[String, (CommandLineOption, Boolean)]()
   private var _main: List[String] ⇒ Either[String, A] = _
   def update(exit: Boolean, shortName: Char, longName: String, clo: CommandLineOption) {
