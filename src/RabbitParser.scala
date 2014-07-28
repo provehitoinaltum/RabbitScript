@@ -241,7 +241,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
   def fncall(i: Indent): Parser[RabbitTree] = (
     i match {
       case StrictIndent(i) ⇒
-        term(StrictIndent(i)) ~ with_sinds_ss(i + 1){ oj =>
+        term(StrictIndent(i)) ~ with_sinds_ss(i + 1){ oj ⇒
           val j = oj getOrElse i
           fncall(StrictIndent(j))
         }

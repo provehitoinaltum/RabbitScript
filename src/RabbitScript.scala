@@ -1,16 +1,15 @@
 package org.rabbitscript
-import net.akouryy.common.Lib._
-
-import collection._
+import net.akouryy.common._
+import Lib._
 
 object RabbitScript {
-  val Version = "α42"
+  val Version = "α43"
   def main(args: Array[String]) {
     val clp = new CommandLineParser[Unit]
     var warningLevel = 1
     clp(false, 'w', "warning") = CommandLineOption (
       arity = 1,
-      f = {
+      handler = {
         case w :: Nil ⇒
           try {
             val warning = w.toInt
@@ -32,11 +31,11 @@ object RabbitScript {
     )
     clp(true, 'v', "version") = CommandLineOption (
       arity = 0,
-      f = { case Nil ⇒ println(s"RabbitScript ver. $Version\n"); Right(()) }
+      handler = { case Nil ⇒ println(s"RabbitScript ver. $Version\n"); Right(()) }
     )
     clp(true, 'h', "help") = CommandLineOption (
       arity = 0,
-      f = {
+      handler = {
         case Nil ⇒
           println("""Is the order help?
                     |Usage: rabbit {<option>} [<filename>]
@@ -70,58 +69,17 @@ object RabbitScript {
           Left(s"file ${args(0)} not found")
       }
     }
-    clp parse args.toList match {
-      case Left(s) ⇒
-        Console.err println s
-        Console.err println "try -h for more information"
-      case Right(_) ⇒
+    args.toList match {
+      case a @ _ :: _ ⇒
+        clp parse args.toList match {
+          case Left(s) ⇒
+            Console.err println s
+            Console.err println "try -h for more information"
+          case Right(_) ⇒
+        }
+      case Nil ⇒
+        println("try -h for the information")
     }
   }
 }
 
-case class CommandLineOption(arity: Int, f: PartialFunction[List[String], Either[String, Unit]])
-
-class CommandLineParser[A] {
-  private val options = mutable.Map[String, (CommandLineOption, Boolean)]()
-  private var _main: List[String] ⇒ Either[String, A] = _
-  def update(exit: Boolean, shortName: Char, longName: String, clo: CommandLineOption) {
-    options("-" + shortName) = (clo, exit)
-    options("--" + longName) = (clo, exit)
-  }
-  def main{}
-  def main_=(main: List[String] ⇒ Either[String, A]) {
-    _main = main
-  }
-  def parse(args: List[String]): Either[String, Option[A]] = args match {
-    case init :: tail ⇒
-      if(init(0) == '-')
-        options.get(init) match {
-          case Some((CommandLineOption(arity, f), true)) ⇒
-            if(tail.length == arity)
-              f(tail) match {
-                case Left(s) ⇒ Left(s"something wrong in $init: $s")
-                case Right(()) ⇒ Right(None)
-              }
-            else
-              Left(s"bad argument length: ${tail.length} for $arity")
-          case Some((CommandLineOption(arity, f), false)) ⇒
-            val (take, drop) = tail splitAt arity
-            if(take.length == arity)
-              f(take) match {
-                case Left(s) ⇒ Left(s"something wrong in $init: $s")
-                case Right(()) ⇒ parse(drop)
-              }
-            else
-              Left(s"bad argument length: ${take.length} for $arity")
-          case None ⇒
-            Left(s"bad option: $init")
-        }
-      else
-        _main(args) match {
-          case Left(s) ⇒ Left(s"something wrong in main arguments: $s")
-          case Right(x) ⇒ Right(Some(x))
-        }
-    case Nil ⇒
-      Right(None)
-  }
-}
