@@ -9,6 +9,9 @@ class CommandLineParser[A] {
     options("-" + shortName) = (clo, exit)
     options("--" + longName) = (clo, exit)
   }
+  def update(exit: Boolean, longName: String, clo: CommandLineOption) {
+    options("--" + longName) = (clo, exit)
+  }
   def main{}
   def main_=(main: List[String] ⇒ Either[String, A]) {
     _main = main

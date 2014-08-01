@@ -1,6 +1,8 @@
-b: Int := 0
-a: Int := b = 10   
-if b == 5 then  
-  a = 20
-  f (a = 5)
-else (f 30) + 10
+a
+  b c,
+   d,
+     e
+      f,
+  g
+    h,
+    i

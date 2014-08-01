@@ -129,6 +129,6 @@ case class ForTree(pattern: PatternTree, expr: RabbitTree, block: RabbitTree) ex
 case class BlockTree(stmts: List[RabbitTree]) extends RabbitTree {
   def debugJavaScript = ((stmts map (x ⇒ x.debugJavaScript) mkString ";\n") mapLines ("  " + _)) + ";"
 }
-case class FnCallTree(f: RabbitTree, x: RabbitTree) extends RabbitTree {
-  def debugJavaScript = s"${f.debugJavaScript}(${x.debugJavaScript})"
+case class FnCallTree(f: RabbitTree, args: List[RabbitTree]) extends RabbitTree {
+  def debugJavaScript = f.debugJavaScript + "(" + (args map (_.debugJavaScript) mkString ",") + ")"
 }

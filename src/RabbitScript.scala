@@ -3,10 +3,22 @@ import net.akouryy.common._
 import Lib._
 
 object RabbitScript {
-  val Version = "α43"
+  val Version = "α44"
   def main(args: Array[String]) {
     val clp = new CommandLineParser[Unit]
+    var color = false
     var warningLevel = 1
+    var logParser = false
+
+    clp(false, "color") = CommandLineOption (
+      arity = 0,
+      handler = {
+        case Nil ⇒
+          color = true
+          println(ResetConsole)
+          Right(())
+      }
+    )
     clp(false, 'w', "warning") = CommandLineOption (
       arity = 1,
       handler = {
@@ -29,6 +41,14 @@ object RabbitScript {
           }
       }
     )
+    clp(false, "log:parser") = CommandLineOption (
+      arity = 0,
+      handler = {
+        case Nil ⇒
+          logParser = true
+          Right(())
+      }
+    )
     clp(true, 'v', "version") = CommandLineOption (
       arity = 0,
       handler = { case Nil ⇒ println(s"RabbitScript ver. $Version\n"); Right(()) }
@@ -44,6 +64,9 @@ object RabbitScript {
                     |<option>:
                     |  -w --warning [0-3]  set warning level
                     |
+                    |     --color          enable colorful output
+                    |     --log:parser     display parser log
+                    |
                     |<command>:
                     |  -v --version        show version number
                     |  -h --help           show this help message
@@ -54,7 +77,7 @@ object RabbitScript {
     clp.main = { args ⇒
       try {
         (io.Source fromFile args(0)) →→ { sc ⇒
-          val rp = new RabbitParser
+          val rp = new RabbitParser(logParser, color)
           rp parse sc.getLines.mkString("\n") match {
             case rp.Success(tree, _) ⇒
               println(tree)

@@ -1,6 +1,8 @@
 package net.akouryy.common
 
 object Lib {
+  val ResetConsole = Console.RESET + Console.BLACK_B + Console.WHITE
+
   implicit class ASource[S <: io.Source](self: S) {
     def ->->[A](f: S ⇒ A) {
       try {
@@ -12,6 +14,7 @@ object Lib {
     def →→ = ->-> _
     def beforeClose = ->-> _
   }
+
   implicit class AString(self: String) {
     def eachLine(f: String ⇒ Unit) = self.lines foreach f
     def mapLines(f: String ⇒ String) = self.lines map f mkString "\n"
