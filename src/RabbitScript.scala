@@ -3,7 +3,7 @@ import net.akouryy.common._
 import Lib._
 
 object RabbitScript {
-  val Version = "α44"
+  val Version = "α45"
   def main(args: Array[String]) {
     val clp = new CommandLineParser[Unit]
     var color = false

@@ -96,10 +96,13 @@ trait RabbitSpaceParser {
   private def some[T, U](f: Option[T] ⇒ U) = (x: T) ⇒ f(Some(x))
   def with_ind     [T](i: Int)(f: Int ⇒ Parser[T]) = ind(i) ~> f(i)
   def with_sind    [T](i: Int)(f: Int ⇒ Parser[T]) = sind(i) ~> f(i)
+  def with_sinds   [T](i: Int)(f: Int ⇒ Parser[T]) = sind(i) ~> rep(" ") >> { case s ⇒ f(i + s.length) }
+/*
   def with_sinds   [T](i: Int)(f: Int ⇒ Parser[T]) = {
     var x = 0
     sind(i) ~ (rep(" ") ^^ {s ⇒ x = s.length}) ~> f(i + x)
   }
+*/
   def with_indp    [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = ind(i) ~> f(Some(i)) | f(None)
   def with_sindp   [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = sind(i) ~> f(Some(i)) | rep(" ") ~> f(None)
   def with_sindps  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f compose Some.apply) | rep(" ") ~> f(None)
@@ -310,7 +313,6 @@ class RabbitParser(log: Boolean, color: Boolean) extends RegexParsers
       case StrictIndent(i) ⇒
         fnCall(StrictIndent(i)) ~ rep( 
           rep(" ") ~> "," ~> ("tupleInner-1", StrictIndent(i)).nameParserExt(with_sinds(i){ j ⇒
-            println("hello")
             fnCall(StrictIndent(j))
           }
         )) ^^ {
