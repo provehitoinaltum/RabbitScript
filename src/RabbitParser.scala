@@ -1,6 +1,5 @@
 package org.rabbitscript
-import net.akouryy.common._
-import Lib._
+import net.akouryy.common.lib._
 
 import util.parsing.combinator._
 import trees._
@@ -11,51 +10,33 @@ trait ExtParser {
 //  type ParserExt[+A] = Parser[A] 
 
   private[this] var indent = 0
-  protected[this] var logParser = false
-  protected[this] var showColorful = false
 
   class ParserExt[+A](p: Parser[A], name: String, ind: Option[Indent]) extends Parser[A] {
     override def apply(in: Input) = {
-      if(logParser && (List("fnCall", "tupleInner", "tupleInner-1", "varRef") contains name)) {
+      if(RabbitScript.Options.logParser/* && (List("fnCall", "tupleInner", "tupleInner-1", "varRef") contains name)*/) {
         ind match {
           case Some(i) ⇒
-            if(showColorful) {
-              println(
-                Console.WHITE + "| " * (indent - 1) + (if(indent==0) "" else "|-") + Console.BOLD + Console.CYAN + name + ResetConsole + "(" + Console.BOLD + i + ResetConsole + ") - " + in
-              )
-              indent += 1
-                val r = p(in)
-              indent -= 1
-              println("| " * indent + Console.BOLD + "`->" + ResetConsole + " " + (
-                r match {
-                  case Success(r, n) ⇒
-                    Console.BOLD + Console.GREEN  + "Success" + ResetConsole + s"(${n.pos}): " + Console.BOLD + Console.GREEN  + r
-                  case Failure(m, n) ⇒
-                    Console.BOLD + Console.YELLOW + "Failure" + ResetConsole + s"(${n.pos}): " + Console.BOLD + Console.YELLOW + m.replace("\n", "\\n")
-                  case Error(m, n) ⇒
-                    Console.BOLD + Console.RED    + "Error"   + ResetConsole + s"(${n.pos}): " + Console.BOLD + Console.RED    + m.replace("\n", "\\n")
-                }
-              ) + ResetConsole + " [" + Console.CYAN + name + ResetConsole + "]")
-              r
-            } else {
-              println(
-                "  " * indent + name + "(" + i + ") - " + in
-              )
-              indent += 1
-                val r = p(in)
-              indent -= 1
-              println("  " * indent + " -> " + (
-                r match {
-                  case Success(r, n) ⇒
-                    s"Success(${n.pos}): ${r}"
-                  case Failure(m, n) ⇒
-                    s"Failure(${n.pos}): ${m.replace("\n", "\\n")}"
-                  case Error(m, n) ⇒
-                    s"Error(${n.pos}): ${m.replace("\n", "\\n")}"
-                }
-              ) + " [" + name + "]")
-              r
-            }
+            println(
+              RabbitScript.Options.White + "| " * (indent - 1) + (if(indent == 0) "" else "|-") + RabbitScript.Options.Bold + RabbitScript.Options.Cyan
+              + name + RabbitScript.Options.ResetConsole + "(" + RabbitScript.Options.Bold + i + RabbitScript.Options.ResetConsole + ") - " + in
+            )
+            indent += 1
+              val r = p(in)
+            indent -= 1
+            println("| " * indent + RabbitScript.Options.Bold + "`->" + RabbitScript.Options.ResetConsole + " " + (
+              r match {
+                case Success(r, n) ⇒
+                  RabbitScript.Options.Bold + RabbitScript.Options.Green  + "Success" + RabbitScript.Options.ResetConsole +
+                    s"(${n.pos}): " + RabbitScript.Options.Bold + RabbitScript.Options.Green  + r
+                case Failure(m, n) ⇒
+                  RabbitScript.Options.Bold + RabbitScript.Options.Yellow + "Failure" + RabbitScript.Options.ResetConsole +
+                    s"(${n.pos}): " + RabbitScript.Options.Bold + RabbitScript.Options.Yellow + m.replace("\n", "\\n")
+                case Error(m, n) ⇒
+                  RabbitScript.Options.Bold + RabbitScript.Options.Red    + "Error"   + RabbitScript.Options.ResetConsole +
+                    s"(${n.pos}): " + RabbitScript.Options.Bold + RabbitScript.Options.Red    + m.replace("\n", "\\n")
+              }
+            ) + RabbitScript.Options.ResetConsole + " [" + RabbitScript.Options.Cyan + name + RabbitScript.Options.ResetConsole + "]")
+            r
           case None ⇒ p(in)
         }
       } else p(in)
@@ -225,11 +206,7 @@ trait RabbitTypeParser {
     }, id ⇒ s"""reserved word "$id" can't be used as identifier""")
 }
 
-class RabbitParser(log: Boolean, color: Boolean) extends RegexParsers
-    with RabbitSpaceParser with RabbitTokenParser with RabbitPatternParser with RabbitTypeParser with ExtParser{
-  logParser = log
-  showColorful = color
-
+class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenParser with RabbitPatternParser with RabbitTypeParser with ExtParser{
   override val skipWhitespace = false
   val reserved = List("true", "false", "var", "if", "else", "then", "while", "until", "do", "for", "in", "function")
 

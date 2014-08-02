@@ -1,5 +1,5 @@
 package org.rabbitscript.trees
-import net.akouryy.common.Lib._
+import net.akouryy.common.lib._
 
 sealed trait RabbitTree {
   def debugJavaScript: String
