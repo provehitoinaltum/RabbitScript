@@ -1,5 +1,7 @@
 package net.akouryy.common
 
+import collection.mutable
+
 package object lib {
   val ResetConsole = Console.RESET + Console.BLACK_B + Console.WHITE
 

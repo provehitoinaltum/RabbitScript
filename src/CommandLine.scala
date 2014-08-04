@@ -1,5 +1,7 @@
 package net.akouryy.common
 
+import collection.mutable
+
 case class CommandLineOption(arity: Int, handler: PartialFunction[List[String], Either[String, Unit]])
 
 class CommandLineParser[A] {

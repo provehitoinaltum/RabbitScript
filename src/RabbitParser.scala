@@ -1,8 +1,9 @@
 package org.rabbitscript
 import net.akouryy.common.lib._
+import trees._
 
 import util.parsing.combinator._
-import trees._
+import collection.mutable
 
 trait ExtParser {
   self: RabbitParser ⇒

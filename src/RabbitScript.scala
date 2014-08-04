@@ -2,6 +2,8 @@ package org.rabbitscript
 import net.akouryy.common._
 import lib.{ResetConsole ⇒ _, _}
 
+import collection.mutable
+
 object RabbitScript {
   object Options {
     var color = false
@@ -33,7 +35,7 @@ object RabbitScript {
     var logTree = false
   }
 
-  val Version = "α46"
+  val Version = "α47"
   def main(args: Array[String]) {
     val clp = new CommandLineParser[Unit]
 
