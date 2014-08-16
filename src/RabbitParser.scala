@@ -1,5 +1,6 @@
 package org.rabbitscript
-import net.akouryy.common.lib._
+import net.akouryy.common._
+import lib._
 
 import util.parsing.combinator._
 import trees._
@@ -9,33 +10,22 @@ trait ExtParser {
 
 //  type ParserExt[+A] = Parser[A] 
 
-  private[this] var indent = 0
-
   class ParserExt[+A](p: Parser[A], name: String, ind: Option[Indent]) extends Parser[A] {
     override def apply(in: Input) = {
       if(RabbitScript.Options.logParser/* && (List("fnCall", "tupleInner", "tupleInner-1", "varRef") contains name)*/) {
         ind match {
           case Some(i) ⇒
-            println(
-              RabbitScript.Options.White + "| " * (indent - 1) + (if(indent == 0) "" else "|-") + RabbitScript.Options.Bold + RabbitScript.Options.Cyan
-              + name + RabbitScript.Options.ResetConsole + "(" + RabbitScript.Options.Bold + i + RabbitScript.Options.ResetConsole + ") - " + in
-            )
-            indent += 1
+            println(s"$name($i) - $in")
+            AdvancedPrintStream.increaseIndent()
               val r = p(in)
-            indent -= 1
-            println("| " * indent + RabbitScript.Options.Bold + "`->" + RabbitScript.Options.ResetConsole + " " + (
+            AdvancedPrintStream.decreaseIndent()
+            println("`-> " + (
               r match {
-                case Success(r, n) ⇒
-                  RabbitScript.Options.Bold + RabbitScript.Options.Green  + "Success" + RabbitScript.Options.ResetConsole +
-                    s"(${n.pos}): " + RabbitScript.Options.Bold + RabbitScript.Options.Green  + r
-                case Failure(m, n) ⇒
-                  RabbitScript.Options.Bold + RabbitScript.Options.Yellow + "Failure" + RabbitScript.Options.ResetConsole +
-                    s"(${n.pos}): " + RabbitScript.Options.Bold + RabbitScript.Options.Yellow + m.replace("\n", "\\n")
-                case Error(m, n) ⇒
-                  RabbitScript.Options.Bold + RabbitScript.Options.Red    + "Error"   + RabbitScript.Options.ResetConsole +
-                    s"(${n.pos}): " + RabbitScript.Options.Bold + RabbitScript.Options.Red    + m.replace("\n", "\\n")
+                case Success(r, n) ⇒ s"Success(${n.pos}): $r"
+                case Failure(m, n) ⇒ s"Failure(${n.pos}): ${m.replace("\n", "\\n")}"
+                case Error(m, n)   ⇒   s"Error(${n.pos}): ${m.replace("\n", "\\n")}"
               }
-            ) + RabbitScript.Options.ResetConsole + " [" + RabbitScript.Options.Cyan + name + RabbitScript.Options.ResetConsole + "]")
+            ) + " [$name]")
             r
           case None ⇒ p(in)
         }
@@ -90,6 +80,13 @@ trait RabbitSpaceParser {
   def with_ind_ss  [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = ind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
   def with_sind_ss [T](i: Int)(f: Option[Int] ⇒ Parser[T]) = sind(i) ~> f(Some(i)) | rep1(" ") ~> f(None)
   def with_sinds_ss[T](i: Int)(f: Option[Int] ⇒ Parser[T]) = with_sinds(i)(f compose Some.apply) | rep1(" ") ~> f(None)
+
+  def with_indp    [T](i: Int, default: Int)(f: Int ⇒ Parser[T]): Parser[T] = with_indp    (i)(x ⇒ f(x getOrElse default))
+  def with_sindp   [T](i: Int, default: Int)(f: Int ⇒ Parser[T]): Parser[T] = with_sindp   (i)(x ⇒ f(x getOrElse default))
+  def with_sindps  [T](i: Int, default: Int)(f: Int ⇒ Parser[T]): Parser[T] = with_sindps  (i)(x ⇒ f(x getOrElse default))
+  def with_ind_ss  [T](i: Int, default: Int)(f: Int ⇒ Parser[T]): Parser[T] = with_ind_ss  (i)(x ⇒ f(x getOrElse default))
+  def with_sind_ss [T](i: Int, default: Int)(f: Int ⇒ Parser[T]): Parser[T] = with_sind_ss (i)(x ⇒ f(x getOrElse default))
+  def with_sinds_ss[T](i: Int, default: Int)(f: Int ⇒ Parser[T]): Parser[T] = with_sinds_ss(i)(x ⇒ f(x getOrElse default))
 
   abstract sealed class Indent
   case class StrictIndent(length: Int) extends Indent
@@ -227,10 +224,8 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
         i match {
           case StrictIndent(i) ⇒
             l(StrictIndent(i)) ~ rep1(
-              with_sindps(i + 1){ oj ⇒
-                val j = oj getOrElse i
-                (ops reduceLeft (_ | _)) ~ with_sinds_ss(j + 1){ od ⇒
-                  val d = od getOrElse j
+              with_sindps(i + 1, i){ j ⇒
+                (ops reduceLeft (_ | _)) ~ with_sinds_ss(j + 1, j){ d ⇒
                   r(StrictIndent(d))
                 }
               }
@@ -261,10 +256,8 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
         (name, i) nameParserExt (
           i match {
             case StrictIndent(i) ⇒
-              l(StrictIndent(i)) ~ with_sindps(i + 1){ oj ⇒
-                val j = oj getOrElse i
-                (ops reduceLeft (_ | _)) ~ with_sinds_ss(j + 1){ od ⇒
-                  val d = od getOrElse j
+              l(StrictIndent(i)) ~ with_sindps(i + 1, i){ j ⇒
+                (ops reduceLeft (_ | _)) ~ with_sinds_ss(j + 1, j){ d ⇒
                   binOpR(name, ops, l, r, f)(StrictIndent(d))
                 }
               }
@@ -360,8 +353,7 @@ class RabbitParser extends RegexParsers with RabbitSpaceParser with RabbitTokenP
   def varDef(i: Indent): ParserExt[VarDefTree] = ("varDef", i) nameParserExt (
     i match {
       case StrictIndent(i) ⇒
-        pattern ~ with_sindps(i + 1){ oj ⇒
-          val j = oj getOrElse i
+        pattern ~ with_sindps(i + 1, i){ j ⇒
           ":=" ~ sindps(j + 1)
         } ~ assign(StrictIndent(i))
       case InBrace ⇒

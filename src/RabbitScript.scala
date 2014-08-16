@@ -1,53 +1,37 @@
 package org.rabbitscript
 import net.akouryy.common._
-import lib.{ResetConsole ⇒ _, _}
+import lib._
 
 object RabbitScript {
   object Options {
-    var color = false
-    def ResetConsole = if(color) lib.ResetConsole else ""
-    def Black      = if(color) Console.BLACK      else ""
-    def BlackB     = if(color) Console.BLACK_B    else ""
-    def Blink      = if(color) Console.BLINK      else ""
-    def Blue       = if(color) Console.BLUE       else ""
-    def BlueB      = if(color) Console.BLUE_B     else ""
-    def Bold       = if(color) Console.BOLD       else ""
-    def Cyan       = if(color) Console.CYAN       else ""
-    def CyanB      = if(color) Console.CYAN_B     else ""
-    def Green      = if(color) Console.GREEN      else ""
-    def GreenB     = if(color) Console.GREEN_B    else ""
-    def Invisible  = if(color) Console.INVISIBLE  else ""
-    def Magenta    = if(color) Console.MAGENTA    else ""
-    def MagentaB   = if(color) Console.MAGENTA_B  else ""
-    def Red        = if(color) Console.RED        else ""
-    def RedB       = if(color) Console.RED_B      else ""
-    def Reset      = if(color) Console.RESET      else ""
-    def Reversed   = if(color) Console.REVERSED   else ""
-    def Underlined = if(color) Console.UNDERLINED else ""
-    def White      = if(color) Console.WHITE      else ""
-    def WhiteB     = if(color) Console.WHITE_B    else ""
-    def Yellow     = if(color) Console.YELLOW     else ""
-    def YellowB    = if(color) Console.YELLOW_B   else ""
     var warningLevel = 1
     var logParser = false
     var logTree = false
   }
 
   val Version = "α46"
-  def main(args: Array[String]) {
-    val clp = new CommandLineParser[Unit]
 
-/*
-    clp(false, "color") = CommandLineOption (
-      arity = 0,
-      handler = {
+  private val clp = new CommandLineParser[Unit]
+
+  def main(args: Array[String]) {
+    AdvancedPrintStream.resetIndent()
+    Console.withOut(AdvancedPrintStream) {
+      args.toList match {
+        case a @ _ :: _ ⇒
+          initCLP()
+          clp parse args.toList match {
+            case Left(s) ⇒
+              Console.err println s
+              Console.err println "Try -h for more information."
+            case Right(_) ⇒
+          }
         case Nil ⇒
-          Options.color = true
-          print(Options.ResetConsole)
-          Right(())
+          Console.err println "Try -h for the information."
       }
-    )
-*/
+    }
+  }
+
+  def initCLP() {
     clp(false, 'w', "warning") = CommandLineOption (
       arity = 1,
       handler = {
@@ -111,7 +95,6 @@ object RabbitScript {
                     |
                     |Try -i <command> for more details.
                     |""".stripMargin)
-//                  |     --color        enable colorful output
           Right(())
       }
     )
@@ -126,11 +109,6 @@ object RabbitScript {
                     |set warning level
                     |""".stripMargin)
           Right(())
-/*
-        case "--color" :: Nil ⇒
-          println(s"--color : ${Console.BOLD}${Console.RED}enable ${Console.GREEN}colorful ${Console.CYAN}output${Lib.ResetConsole}")
-          Right(())
-*/
         case "--log" :: Nil ⇒
           println("""--log
                     |Arguments:
@@ -164,36 +142,25 @@ object RabbitScript {
         case c :: Nil ⇒ Left("no information of " + c + "found")
       }
     )
-    clp.main = { args ⇒
-      try {
-        (io.Source fromFile args(0)) →→ { sc ⇒
-          val rp = new RabbitParser
-          rp parse sc.getLines.mkString("\n") match {
-            case rp.Success(tree, _) ⇒
-              if(Options.logTree)
-                println(tree)
-              tree.debugJavaScript eachLine (l ⇒ println(l drop 2))
-            case x ⇒
-              println(x)
-          }
-        }
-        Right(())
-      } catch {
-        case _: java.io.FileNotFoundException ⇒
-          Left(s"file ${args(0)} not found")
-      }
-    }
-    args.toList match {
-      case a @ _ :: _ ⇒
-        clp parse args.toList match {
-          case Left(s) ⇒
-            Console.err println s
-            Console.err println "Try -h for more information."
-          case Right(_) ⇒
-        }
-      case Nil ⇒
-        Console.err println "Try -h for the information."
-    }
+    clp.main = mainAction
   }
-}
 
+  def mainAction(mainArgs: List[String]) =
+    try {
+      (io.Source fromFile mainArgs(0)) →→ { sc ⇒
+        val rp = new RabbitParser
+        rp parse sc.getLines.mkString("\n") match {
+          case rp.Success(tree, _) ⇒
+            if(Options.logTree)
+              println(tree)
+            tree.debugJavaScript eachLine (l ⇒ println(l drop 2))
+          case x ⇒
+            println(x)
+        }
+      }
+      Right(())
+    } catch {
+      case _: java.io.FileNotFoundException ⇒
+        Left(s"file ${mainArgs(0)} not found")
+    }
+}

@@ -1,8 +1,6 @@
 package net.akouryy.common
 
 package object lib {
-  val ResetConsole = Console.RESET + Console.BLACK_B + Console.WHITE
-
   implicit class ASource[S <: io.Source](self: S) {
     def ->->[A](f: S ⇒ A) {
       try {
