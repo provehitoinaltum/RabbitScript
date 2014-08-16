@@ -152,7 +152,7 @@ object RabbitScript {
         rp parse sc.getLines.mkString("\n") match {
           case rp.Success(tree, _) ⇒
             if(Options.logTree)
-              println(tree)
+              tree.dumpTree()
             tree.debugJavaScript eachLine (l ⇒ println(l drop 2))
           case x ⇒
             println(x)
